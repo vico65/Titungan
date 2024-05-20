@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Titungan</string>
+    <string name="new_game">New Game</string>
+    <string name="high_score">High Scores</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
 </resources>
