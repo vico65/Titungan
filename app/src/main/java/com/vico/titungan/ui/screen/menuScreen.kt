@@ -27,7 +27,7 @@ import com.vico.titungan.ui.theme.padding16dp
 import com.vico.titungan.ui.theme.width248dp
 import com.vico.titungan.ui.theme.padding64dp
 
-@Preview(showBackground = true, device = Devices.DEFAULT, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true)
 @Composable
 fun HelloJetpackComposeAppPreview() {
     var navController: NavHostController = rememberNavController()
@@ -42,8 +42,7 @@ fun MenuScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding16dp)
-            .border(width = border2dp, color = MaterialTheme.colorScheme.onBackground),
+            .padding(padding16dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
