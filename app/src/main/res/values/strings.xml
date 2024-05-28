@@ -4,4 +4,6 @@
     <string name="high_score">High Scores</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
+    <string name="first_player_default_name">First Player</string>
+    <string name="second_player_default_name">Second Player\n</string>
 </resources>

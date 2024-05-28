@@ -1,5 +1,6 @@
 package com.vico.titungan.ui.component
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -39,11 +40,16 @@ fun TicTacToeBoard(
 ) {
 
     val dividerWidth = remember { 8.dp }
+//
 
     BoxWithConstraints(modifier = modifier) {
         val tileSize = remember(maxWidth, dividerWidth) {
             (maxWidth / 3) - dividerWidth / 1.5f
         }
+
+
+        Log.d("maxwidth", "tile = ${maxWidth}")
+        Log.d("Tile Size", "tile = ${tileSize}")
 
         for ((row, pointTypeRow) in board.withIndex()) {
             for ((col, pointType) in pointTypeRow.withIndex()) {

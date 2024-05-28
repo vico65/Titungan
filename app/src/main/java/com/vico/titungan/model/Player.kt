@@ -1,34 +1,14 @@
 package com.vico.titungan.model
 
+import android.os.Parcelable
 import com.vico.titungan.data.PointType
+import kotlinx.parcelize.Parcelize
 
 
+@Parcelize
 data class Player(
-    val id: Int,
-    val win: Int,
     val name: String,
-    var pointType: PointType
-) {
-    companion object {
-        val Player1 = Player(
-            id = 0,
-            win = 0,
-            name = "Player 1",
-            pointType = PointType.X
-        )
-
-        val Player2 = Player(
-            id = 1,
-            win = 0,
-            name = "Player 2",
-            pointType = PointType.O
-        )
-
-//        val Computer = Player(
-//            id = 2,
-//            win = 0,
-//            name = "Computer",
-//            pointType = PointType.O
-//        )
-    }
-}
+    val shape: String? = null,
+//    var diceIndex: Int = 0,
+//    val type: PlayerType = PlayerType.Human
+) : Parcelable
