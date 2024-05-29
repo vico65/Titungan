@@ -15,23 +15,16 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.lifecycleScope
 import com.vico.titungan.R
-import com.vico.titungan.data.PointType
 import com.vico.titungan.logic.SimpleGameLogic
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
 import com.vico.titungan.ui.component.RingShape
 import com.vico.titungan.ui.component.XShape
 import com.vico.titungan.ui.component.toName
-import com.vico.titungan.ui.component.toPointType
 import com.vico.titungan.ui.component.toShape
 import com.vico.titungan.ui.screen.game.GameConstants.gameDefaultSize
 import io.github.yamin8000.dooz.game.logic.GameLogic
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class GameState (
@@ -93,6 +86,7 @@ class GameState (
     fun playCell(
         cell: TitunganCell
     ) {
+        Log.d("GameState", "Playing cell at (${cell.x}, ${cell.y})")
         checkIfGameIsFinished()
         changeCellOwner(cell)
         checkIfGameIsFinished()
@@ -107,13 +101,16 @@ class GameState (
             MediaPlayer.create(context, R.raw.pencil).start()
 
         if (cell.owner == null && isGameStarted.value) {
-            Log.i("LastPlayedCell", "Value = ${lastPlayedCells.value}")
+            Log.d("GameState", "Changing cell owner")
 
             lastPlayedCells.value = buildList {
                 addAll(lastPlayedCells.value)
                 add(cell)
             }
             cell.owner = currentPlayer.value
+
+            Log.d("GameState", "Cell owner changed: ${cell.x}, ${cell.y}")
+
             changePlayer()
         } else {
             Log.i("StatusPlayer", (cell.owner != null).toString())
@@ -228,7 +225,6 @@ class GameState (
 fun rememberHomeState(
     hapticFeedback: HapticFeedback = LocalHapticFeedback.current,
     context: Context = LocalContext.current,
-    coroutineScope: LifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycleScope,
     titunganCell: MutableState<List<List<TitunganCell>>> = rememberSaveable { mutableStateOf(emptyList()) },
     gameSize: MutableIntState = rememberSaveable { mutableIntStateOf(gameDefaultSize) },
     currentPlayer: MutableState<Player?> = rememberSaveable { mutableStateOf(null) },
@@ -236,9 +232,8 @@ fun rememberHomeState(
     isGameStarted: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     isGameFinished: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     winner: MutableState<Player?> = rememberSaveable { mutableStateOf(null) },
-    isGameDrew: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    winnerCells: MutableState<List<TitunganCell>> = rememberSaveable { mutableStateOf(emptyList()) },
-    isRollingDices: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+//    isGameDrew: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+//    isRollingDices: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 //        firstPlayerPolicy: MutableState<FirstPlayerPolicy> = rememberSaveable {
 //            mutableStateOf(
 //                FirstPlayerPolicy.DiceRolling
@@ -248,7 +243,6 @@ fun rememberHomeState(
 ) = remember(
     hapticFeedback,
     context,
-    coroutineScope,
     titunganCell,
     gameSize,
     currentPlayer,
@@ -256,9 +250,6 @@ fun rememberHomeState(
     isGameStarted,
     isGameFinished,
     winner,
-    isGameDrew,
-    winnerCells,
-    isRollingDices,
     lastPlayedCells
 ) {
     GameState(
@@ -276,3 +267,4 @@ fun rememberHomeState(
         lastPlayedCells
     )
 }
+

@@ -27,8 +27,15 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.ArrowForward
+import androidx.compose.material.icons.twotone.Build
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -45,6 +52,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -79,10 +87,39 @@ fun GameScreen(
     LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
     val gameState = rememberHomeState()
+
+    Log.d("GameScreen", "Current player: ${gameState.currentPlayer.value?.name}, Game started: ${gameState.isGameStarted.value}")
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    gameState.newGame()
 
     Scaffold (
+        bottomBar = {
+            BottomAppBar(
+                actions = {
+                    FilledIconButton(
+                        onClick = { },
+                        enabled = gameState.isGameStarted.value && gameState.lastPlayedCells.value.isNotEmpty(),
+                        content = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.TwoTone.ArrowForward, "Halo"
+                            )
+                        }
+                    )
+                },
+                floatingActionButton = {
+                    ExtendedFloatingActionButton(
+                        text = { Text(text = "Pencet") },
+                        onClick = { gameState.newGame() },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.TwoTone.Build,
+                                contentDescription = null
+                            )
+                        }
+                    )
+                }
+            )
+        },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = { contentPadding ->
             Surface (
@@ -126,8 +163,7 @@ fun GameScreen(
 //                            )
 
                             AnimatedVisibility(
-//                                visible = gameState.isGameStarted.value && !gameState.isRollingDices.value,
-                                visible = true,
+                                visible = gameState.isGameStarted.value,
                                 enter = scaleIn(),
                                 exit = scaleOut(),
                                 content = {
@@ -171,18 +207,19 @@ private fun GameBoard(
         verticalArrangement = Arrangement.spacedBy(itemMargin),
         userScrollEnabled = false,
         content = {
+
             gameCells.forEachIndexed { _, row ->
                 itemsIndexed(row) { _, cell ->
-//                    val colors = if (cell in winnerCells)
-//                        MaterialTheme.colorScheme.secondary to MaterialTheme.colorScheme.onSecondary
-//                    else MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+                    Log.i("cell owner", (cell.owner == null).toString())
+
                     TitunganItem(
                         cell,
                         clickable = !isGameFinished && cell.owner == null,
                         shape = shapeProvider(cell.owner),
                         size = boxItemSize,
                         hasOwner = cell.owner != null,
-                        onClick = { onItemClick(cell) },
+                        onClick = { Log.d("GameBoard", "Cell clicked at (${cell.x}, ${cell.y})")
+                            onItemClick(cell)},
                         backgroundColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
@@ -217,6 +254,7 @@ private fun TitunganItem(
         contentAlignment = Alignment.Center,
         content = {
             AnimatedVisibility(
+
                 visible = !hasOwner,
                 content = {
                     if (!hasOwner) {
