@@ -6,11 +6,14 @@ import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -129,32 +132,20 @@ fun GameScreen(
                             .padding(vertical = 16.dp)
                             .verticalScroll(rememberScrollState()),
                         content = {
-//                            AnimatedVisibility(
-////                                visible = gameState.isGameStarted.value,
-//                                visible = true,
-//                                enter = slideInHorizontally(
-//                                    initialOffsetX = { it },
-//                                    animationSpec = tween(300)
-//                                ),
-//                                content = {
-//                                    PlayerCards(
-//                                        players = gameState.players.value,
-//                                        currentPlayer = gameState.currentPlayer.value
-//                                    )
-////                                    var player1 = Player("First Player", PointType.O)
-////                                    var player2 = Player("Second Player", PointType.X)
-////
-////                                    var players = buildList {
-////                                        add(player1)
-////                                        add(player2)
-////                                    }
-////
-////                                    PlayerCards(
-////                                        players = players,
-////                                        currentPlayer = player1
-////                                    )
-//                                }
-//                            )
+                            AnimatedVisibility(
+//                                visible = gameState.isGameStarted.value,
+                                visible = true,
+                                enter = slideInHorizontally(
+                                    initialOffsetX = { it },
+                                    animationSpec = tween(300)
+                                ),
+                                content = {
+                                    PlayerCards(
+                                        players = gameState.players.value,
+                                        currentPlayer = gameState.currentPlayer.value
+                                    )
+                                }
+                            )
 
                             AnimatedVisibility(
                                 visible = gameState.isGameStarted.value,
@@ -166,7 +157,7 @@ fun GameScreen(
                                         gameCells = gameState.gameCells.value,
                                         isGameFinished = gameState.isGameFinished.value,
                                         shapeProvider = gameState::getOwnerShape,
-                                        onItemClick = gameState::playCell
+                                        onItemClick = gameState::changeActiveCell
                                     )
                                 }
                             )
@@ -176,9 +167,102 @@ fun GameScreen(
                                 enter = scaleIn(),
                                 exit = scaleOut(),
                                 content = {
-                                    formInputNumber(
+                                    var expanded by remember { mutableStateOf(false) }
+                                    val operators = listOf("+", "-", "x", "/")
 
-                                    )
+                                    Column (
+                                        modifier = Modifier
+                                            .padding(10.dp)
+                                            .fillMaxWidth(),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            // Input angka pertama
+                                            OutlinedTextField(
+                                                value = gameState.numberInput1.value,
+                                                onValueChange = { gameState.numberInput1.value = it },
+                                                label = { Text("Angka 1", color = Color.Gray) },
+                                                modifier = Modifier
+                                                    .weight(2f)
+                                                    .height(56.dp), // Tinggi yang lebih besar
+                                                textStyle = TextStyle(color = Color.Black),
+                                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                                    focusedBorderColor = Color(0xFF01579B), // Warna biru yang cerah saat fokus
+                                                    unfocusedBorderColor = Color(0xFF01579B).copy(alpha = 0.3f), // Warna biru yang cerah saat tidak fokus
+                                                    cursorColor = Color(0xFF01579B) // Warna kursor biru yang cerah
+                                                )// Warna teks hitam
+                                            )
+
+                                            // Dropdown menu untuk operator
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clickable { expanded = true },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    gameState.selectedOperator.value,
+                                                    modifier = Modifier.padding(10.dp),
+                                                    style = TextStyle(
+                                                        color = Color(0xFF01579B), // Warna biru yang cerah
+                                                        fontSize = 24.sp
+                                                    )
+                                                )
+                                                DropdownMenu(
+                                                    expanded = expanded,
+                                                    onDismissRequest = { expanded = false }
+                                                ) {
+                                                    operators.forEach { operator ->
+                                                        DropdownMenuItem(onClick = {
+                                                            gameState.selectedOperator.value = operator
+                                                            expanded = false
+                                                        }, text = { Text(
+                                                            operator,
+                                                            style = TextStyle(
+                                                                color = Color(0xFF01579B), // Warna biru yang cerah
+                                                                fontSize = 16.sp
+                                                            )
+                                                        )})
+                                                    }
+                                                }
+                                            }
+
+                                            // Input angka kedua
+                                            OutlinedTextField(
+                                                value = gameState.numberInput2.value,
+                                                onValueChange = { gameState.numberInput2.value = it },
+                                                label = { Text("Angka 2", color = Color.Gray) },
+                                                modifier = Modifier
+                                                    .weight(2f)
+                                                    .height(56.dp), // Tinggi yang lebih besar
+                                                textStyle = TextStyle(color = Color.Black),
+                                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                                    focusedBorderColor = Color(0xFF01579B),
+                                                    unfocusedBorderColor = Color(0xFF01579B).copy(alpha = 0.3f),
+                                                    cursorColor = Color(0xFF01579B)
+                                                )
+                                            )
+
+                                            Button(
+                                                onClick = {
+                                                    var hasil = gameState.countResult()
+                                                    Log.i("Hasil", "Angka 1 adalah ${gameState.numberInput1.value}, angka 2 adalah ${gameState.numberInput2.value}, apakah sama dengan active cell = ${gameState.checkResult()},dan hasilnya adalah ${hasil}")
+                                                },
+                                                modifier = Modifier // Besar ikon
+                                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                                    .weight(2f), // Spasi di sekitar tombol
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = Color(0xFF01579B),
+                                                    contentColor = Color.White
+                                                ),
+                                                shape = CircleShape // Bentuk tombol bulat
+                                            ) {
+                                                Icon(Icons.Default.PlayArrow, contentDescription = "Hitung")
+                                            }
+                                        }
+                                    }
 
 
                                 }
@@ -193,105 +277,16 @@ fun GameScreen(
 
 }
 
-@Composable
-private fun formInputNumber(
-    gameCells: List<List<TitunganCell>>,
-    isGameFinished: Boolean,
-    onItemClick: (TitunganCell) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Column (
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // Input angka pertama
-            OutlinedTextField(
-                value = number1,
-                onValueChange = { number1 = it },
-                label = { Text("Angka 1", color = Color.Gray) },
-                modifier = Modifier
-                    .weight(2f)
-                    .height(56.dp), // Tinggi yang lebih besar
-                textStyle = TextStyle(color = Color.Black),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color(0xFF01579B), // Warna biru yang cerah saat fokus
-                    unfocusedBorderColor = Color(0xFF01579B).copy(alpha = 0.3f), // Warna biru yang cerah saat tidak fokus
-                    cursorColor = Color(0xFF01579B) // Warna kursor biru yang cerah
-                )// Warna teks hitam
-            )
-
-            // Dropdown menu untuk operator
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { expanded = true },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    selectedOperator,
-                    modifier = Modifier.padding(16.dp),
-                    style = TextStyle(
-                        color = Color(0xFF01579B), // Warna biru yang cerah
-                        fontSize = 24.sp
-                    )
-                )
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    operators.forEach { operator ->
-                        DropdownMenuItem(onClick = {
-                            selectedOperator = operator
-                            expanded = false
-                        }, text = { Text(
-                            operator,
-                            style = TextStyle(
-                                color = Color(0xFF01579B), // Warna biru yang cerah
-                                fontSize = 16.sp
-                            )
-                        )})
-                    }
-                }
-            }
-
-            // Input angka kedua
-            OutlinedTextField(
-                value = number2,
-                onValueChange = { number2 = it },
-                label = { Text("Angka 2", color = Color.Gray) },
-                modifier = Modifier
-                    .weight(2f)
-                    .height(56.dp), // Tinggi yang lebih besar
-                textStyle = TextStyle(color = Color.Black),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color(0xFF01579B), // Warna biru yang cerah saat fokus
-                    unfocusedBorderColor = Color(0xFF01579B).copy(alpha = 0.3f), // Warna biru yang cerah saat tidak fokus
-                    cursorColor = Color(0xFF01579B) // Warna kursor biru yang cerah
-                )// Warna teks hitam
-            )
-
-            Button(
-                onClick = { /* Implementasikan logika perhitungan di sini */ },
-                modifier = Modifier // Besar ikon
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .weight(2f), // Spasi di sekitar tombol
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF01579B), // Warna biru yang cerah
-                    contentColor = Color.White
-                ),
-                shape = CircleShape // Bentuk tombol bulat
-            ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Hitung")
-            }
-        }
-    }
-}
+//@Composable
+//private fun formInputNumber(
+//    gameCells: List<List<TitunganCell>>,
+//    isGameFinished: Boolean,
+//    numberInput1: Int,
+//    numberInput2: Int,
+//    onItemClick: (TitunganCell) -> Unit
+//) {
+//
+//}
 
 
 @Composable
@@ -305,7 +300,7 @@ private fun GameBoard(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val boxPadding = 16.dp
     val boxSize = screenWidth - (2 * boxPadding.value).dp
-    val itemMargin = 8.dp
+    val itemMargin = 6.dp
     val boxItemSize = ((boxSize.value - ((itemMargin.value * (gameSize - 1)))) / gameSize).dp
 
     LazyVerticalGrid(
@@ -320,15 +315,23 @@ private fun GameBoard(
                 itemsIndexed(row) { _, cell ->
                     Log.i("cell owner", (cell.owner == null).toString())
 
+                    val backgroundColorAnimated by animateColorAsState(
+                        if (cell.isActive) MaterialTheme.colorScheme.secondary else  MaterialTheme.colorScheme.primary,
+                        animationSpec = tween(durationMillis = 200)
+                    )
+
                     TitunganItem(
                         cell,
                         clickable = !isGameFinished && cell.owner == null,
                         shape = shapeProvider(cell.owner),
                         size = boxItemSize,
                         hasOwner = cell.owner != null,
-                        onClick = { Log.d("GameBoard", "Cell clicked at (${cell.x}, ${cell.y})")
-                            onItemClick(cell)},
-                        backgroundColor = MaterialTheme.colorScheme.primary,
+                        onClick = {
+                            Log.d("GameBoard", "Cell clicked at (${cell.x}, ${cell.y} and has active = ${cell.isActive}")
+
+                            onItemClick(cell)
+                                  },
+                        backgroundColor = backgroundColorAnimated,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -348,17 +351,19 @@ private fun TitunganItem(
     contentColor: Color,
     onClick: () -> Unit
 ) {
+
     Box(
         modifier = Modifier
             .size(size)
-            .clip(RoundedCornerShape(5.dp))
+            .clip(RoundedCornerShape(10.dp))
             .background(backgroundColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(),
+                indication = rememberRipple(color = Color(0xFF81D4FA)),
                 enabled = clickable,
                 onClick = onClick
-            ),
+            )
+            .border(2.dp, Color.White, RoundedCornerShape(10.dp)),
         contentAlignment = Alignment.Center,
         content = {
             AnimatedVisibility(
@@ -370,7 +375,7 @@ private fun TitunganItem(
                             text = cell.number.toString(),
                             color = Color.White,
                             style = MaterialTheme.typography.displayLarge,
-                            fontSize = 24.sp
+                            fontSize = 28.sp
                         )
                     }
                 }
@@ -379,6 +384,7 @@ private fun TitunganItem(
             AnimatedVisibility(
                 visible = hasOwner,
                 enter = scaleIn(animationSpec = tween(150)),
+                exit = scaleOut(animationSpec = tween(150)) + fadeOut(),
                 content = {
                     if (hasOwner) {
                         Box(

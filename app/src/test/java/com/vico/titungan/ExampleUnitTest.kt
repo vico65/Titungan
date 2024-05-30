@@ -17,17 +17,25 @@ class ExampleUnitTest {
 
         var random = randomNumber(3)
         print(random)
-        print(random.get(1))
     }
 }
 
-fun randomNumber(jumlahCells : Int = 0) : MutableList<Int>{
-    var angkaRandom  = mutableListOf<Int>()
+fun randomNumber(jumlahCells : Int = 0) {
+    val cells = listOf(
+        listOf(
+            TitunganCell(0, 0, 1, isActive =false),
+            TitunganCell(0, 1, 2, isActive = true)
+        ),
+        listOf(
+            TitunganCell(1, 0, 3, isActive =false),
+            TitunganCell(1, 1, 4, isActive =false)
+        )
+    )
 
-    for (i in 1..jumlahCells * jumlahCells) {
-        angkaRandom.add(Random.nextInt(0, 100))
-    }
-    return angkaRandom
+    // Menggunakan `flatMap` dan `find` untuk mendapatkan sel pertama yang aktif
+    println("Sebelum diubah: ${cells[0][1].isActive}")
+    cells.flatMap { it }.find { it.isActive }?.isActive = false
+    println("Sebelum diubah: ${cells[0][1].isActive}")
 }
 
 fun checkList() {

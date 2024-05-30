@@ -46,9 +46,9 @@ class GameState (
     //buat koncang dadu penentu siapo yg pertamo
 //    var firstPlayerPolicy: MutableState<FirstPlayerPolicy>,
 
-    var numberInput1: MutableIntState,
-    var numberInput2: MutableIntState,
-    var selectedOperator: MutableState<Operator>
+    var numberInput1: MutableState<String>,
+    var numberInput2: MutableState<String>,
+    var selectedOperator: MutableState<String>
 
     ) {
 
@@ -84,7 +84,6 @@ class GameState (
         isGameFinished.value = false
         isGameStarted.value = false
 //        isGameDrew.value = false
-        lastPlayedCells.value = listOf()
         gameCells.value = getEmptyBoard()
     }
 
@@ -97,7 +96,7 @@ class GameState (
         checkIfGameIsFinished()
     }
 
-    private fun changeCellOwner(
+    fun changeActiveCell(
         cell: TitunganCell
     ) {
         if (isVibrationOn)
@@ -105,13 +104,17 @@ class GameState (
         if (isSoundOn)
             MediaPlayer.create(context, R.raw.pencil).start()
 
+        gameCells.value.flatten().find { it.isActive }?.isActive = false
+        cell.isActive = true
+    }
+
+    private fun changeCellOwner(
+        cell: TitunganCell
+    ) {
+
+
         if (cell.owner == null && isGameStarted.value) {
             Log.d("GameState", "Changing cell owner")
-
-            lastPlayedCells.value = buildList {
-                addAll(lastPlayedCells.value)
-                add(cell)
-            }
             cell.owner = currentPlayer.value
 
             Log.d("GameState", "Cell owner changed: ${cell.x}, ${cell.y}")
@@ -223,6 +226,26 @@ class GameState (
         return gameLogic?.findWinner()
     }
 
+     fun countResult (
+        number1 : Int = numberInput1.value.toInt(),
+        number2 : Int = numberInput2.value.toInt(),
+        operator: String = selectedOperator.value
+    ) : Int{
+        return when(operator) {
+            "+" -> number1 + number2
+            "-" -> number1 - number2
+            "x" -> number1 * number2
+            "/" -> number1 / number2
+            else -> {0}
+        }
+    }
+
+    fun checkResult(
+        result: Int? = gameCells.value.flatten().find { it.isActive }?.number
+    ) : Boolean {
+        return countResult() == result
+    }
+
 
 }
 
@@ -237,6 +260,15 @@ fun rememberHomeState(
     isGameStarted: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     isGameFinished: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     winner: MutableState<Player?> = rememberSaveable { mutableStateOf(null) },
+    numberInput1: MutableState<String> = rememberSaveable {
+        mutableStateOf("")
+    },
+    numberInput2: MutableState<String> = rememberSaveable {
+        mutableStateOf("")
+    },
+    selectedOperator: MutableState<String> = rememberSaveable {
+        mutableStateOf("+")
+    }
 //    isGameDrew: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 //    isRollingDices: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 //        firstPlayerPolicy: MutableState<FirstPlayerPolicy> = rememberSaveable {
@@ -244,7 +276,6 @@ fun rememberHomeState(
 //                FirstPlayerPolicy.DiceRolling
 //            )
 //        },
-    lastPlayedCells: MutableState<List<TitunganCell>> = rememberSaveable { mutableStateOf(listOf()) }
 ) = remember(
     hapticFeedback,
     context,
@@ -255,7 +286,9 @@ fun rememberHomeState(
     isGameStarted,
     isGameFinished,
     winner,
-    lastPlayedCells
+    numberInput1,
+    numberInput2,
+    selectedOperator
 ) {
     GameState(
         hapticFeedback,
@@ -269,7 +302,9 @@ fun rememberHomeState(
         winner,
 //            isRollingDices,
 //            firstPlayerPolicy,
-        lastPlayedCells
+        numberInput1,
+        numberInput2,
+        selectedOperator
     )
 }
 

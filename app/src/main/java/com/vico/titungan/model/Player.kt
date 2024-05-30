@@ -9,6 +9,7 @@ import kotlinx.parcelize.Parcelize
 data class Player(
     val name: String,
     val shape: String? = null,
+
 //    var diceIndex: Int = 0,
 //    val type: PlayerType = PlayerType.Human
 ) : Parcelable

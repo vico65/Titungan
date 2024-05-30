@@ -1,5 +1,6 @@
 package com.vico.titungan.ui.screen.game
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -91,7 +92,7 @@ fun CalculatorRow() {
     var selectedOperator by remember { mutableStateOf("+") }
     val operators = listOf("+", "-", "x", "/")
 
-
+//    Log.i("Hasil", "Angka 1 adalah ${gameState.numberInput1.value}, angka 2 adalah ${gameState.numberInput2.value}, dan hasilnya adalah ${hasil}")
 }
 @Preview(showBackground = true)
 @Composable
