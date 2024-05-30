@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import com.vico.titungan.R
 import com.vico.titungan.logic.SimpleGameLogic
+import com.vico.titungan.model.Operator
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
 import com.vico.titungan.ui.component.RingShape
@@ -38,13 +39,17 @@ class GameState (
     var isGameStarted: MutableState<Boolean>,
     var isGameFinished: MutableState<Boolean>,
     var winner: MutableState<Player?>,
+
 //    var isGameDrew: MutableState<Boolean>
 //    val isRollingDices: MutableState<Boolean>,
 
     //buat koncang dadu penentu siapo yg pertamo
 //    var firstPlayerPolicy: MutableState<FirstPlayerPolicy>,
 
-    var lastPlayedCells: MutableState<List<TitunganCell>>,
+    var numberInput1: MutableIntState,
+    var numberInput2: MutableIntState,
+    var selectedOperator: MutableState<Operator>
+
     ) {
 
     private var isSoundOn = true
