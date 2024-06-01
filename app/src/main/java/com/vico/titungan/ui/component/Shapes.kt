@@ -68,15 +68,6 @@ fun Shape.toName() = when (this) {
     else -> null
 }
 
-fun Shape.toPointType() = when(this) {
-//    TriangleShape -> Constants.Shapes.triangleShape
-    CircleShape -> PointType.O
-//    RectangleShape -> Constants.Shapes.rectangleShape
-    XShape -> PointType.X
-    RingShape -> PointType.O
-    else -> null
-}
-
 
 fun String.toShape() = when (this) {
     Constants.Shapes.triangleShape -> TriangleShape
@@ -225,7 +216,7 @@ fun ClickableShape(
 fun ShapePreview(
     shape: Shape = RingShape,
     size: Dp = 50.dp,
-    color: Color = MaterialTheme.colorScheme.secondary
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
     Box(
         modifier = Modifier

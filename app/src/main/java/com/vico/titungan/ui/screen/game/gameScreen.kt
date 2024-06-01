@@ -73,6 +73,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -84,8 +85,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.MaterialTheme.colors
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
-import com.vico.titungan.ui.component.PlayerCards
+import com.vico.titungan.ui.component.ScoreBoard
 import com.vico.titungan.ui.theme.TitunganTheme
+import com.vico.titungan.ui.theme.fontFamilyFredoka
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
@@ -112,13 +114,13 @@ fun GameScreen(
 
     gameState.newGame()
 
-    Log.d("GameScreen", "Current player: ${gameState.currentPlayer.value?.name}, Game started: ${gameState.isGameStarted.value}")
-
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold (
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = { contentPadding ->
+
+
             Surface (
                 modifier = Modifier
                     .fillMaxSize()
@@ -133,14 +135,11 @@ fun GameScreen(
                             .verticalScroll(rememberScrollState()),
                         content = {
                             AnimatedVisibility(
-//                                visible = gameState.isGameStarted.value,
                                 visible = true,
-                                enter = slideInHorizontally(
-                                    initialOffsetX = { it },
-                                    animationSpec = tween(300)
-                                ),
                                 content = {
-                                    PlayerCards(
+
+                                    Log.i("Info current", "current player is = ${gameState.currentPlayer.value?.name} ")
+                                    ScoreBoard(
                                         players = gameState.players.value,
                                         currentPlayer = gameState.currentPlayer.value
                                     )
@@ -247,11 +246,12 @@ fun GameScreen(
 
                                             Button(
                                                 onClick = {
-                                                    var hasil = gameState.countResult()
-                                                    Log.i("Hasil", "Angka 1 adalah ${gameState.numberInput1.value}, angka 2 adalah ${gameState.numberInput2.value}, apakah sama dengan active cell = ${gameState.checkResult()},dan hasilnya adalah ${hasil}")
+
+                                                          gameState.addScore()
+
                                                 },
                                                 modifier = Modifier // Besar ikon
-                                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                                    .padding(start = 16.dp)
                                                     .weight(2f), // Spasi di sekitar tombol
                                                 colors = ButtonDefaults.buttonColors(
                                                     containerColor = Color(0xFF01579B),
@@ -303,6 +303,8 @@ private fun GameBoard(
     val itemMargin = 6.dp
     val boxItemSize = ((boxSize.value - ((itemMargin.value * (gameSize - 1)))) / gameSize).dp
 
+    var activeCell by remember { mutableStateOf<TitunganCell?>(null) }
+
     LazyVerticalGrid(
         modifier = Modifier.size(boxSize),
         columns = GridCells.Fixed(gameSize),
@@ -316,8 +318,9 @@ private fun GameBoard(
                     Log.i("cell owner", (cell.owner == null).toString())
 
                     val backgroundColorAnimated by animateColorAsState(
-                        if (cell.isActive) MaterialTheme.colorScheme.secondary else  MaterialTheme.colorScheme.primary,
-                        animationSpec = tween(durationMillis = 200)
+                        targetValue = if (cell == activeCell) Color.Green else MaterialTheme.colorScheme.primary,
+                        animationSpec = tween(durationMillis = 300),
+                        label = "backgroundColorAnimated"
                     )
 
                     TitunganItem(
@@ -329,6 +332,9 @@ private fun GameBoard(
                         onClick = {
                             Log.d("GameBoard", "Cell clicked at (${cell.x}, ${cell.y} and has active = ${cell.isActive}")
 
+                            activeCell?.isActive = false
+                            cell.isActive = true
+                            activeCell = cell
                             onItemClick(cell)
                                   },
                         backgroundColor = backgroundColorAnimated,
@@ -362,8 +368,7 @@ private fun TitunganItem(
                 indication = rememberRipple(color = Color(0xFF81D4FA)),
                 enabled = clickable,
                 onClick = onClick
-            )
-            .border(2.dp, Color.White, RoundedCornerShape(10.dp)),
+            ),
         contentAlignment = Alignment.Center,
         content = {
             AnimatedVisibility(
@@ -374,8 +379,8 @@ private fun TitunganItem(
                         Text(
                             text = cell.number.toString(),
                             color = Color.White,
-                            style = MaterialTheme.typography.displayLarge,
-                            fontSize = 28.sp
+                            style = MaterialTheme.typography.displayLarge.copy(fontFamily = fontFamilyFredoka),
+                            fontSize = 28.sp,
                         )
                     }
                 }

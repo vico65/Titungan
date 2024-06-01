@@ -198,9 +198,32 @@ class GameState (
         else owner?.shape?.toShape() ?: RingShape
     }
 
+    fun addScore(
+//        player: Player,
+    ) {
+        Log.i("Player Turn", "Before is ${currentPlayer.value?.name} turn")
+
+        currentPlayer.value?.score = currentPlayer.value?.score!! + 1
+        changePlayer()
+
+        Log.i("Player score", "Score player 1 : ${players.value.get(0).score}")
+        Log.i("Player Turn", "Now is ${currentPlayer.value?.name} turn")
+    }
     private fun changePlayer() {
-        if (currentPlayer.value == players.value.first()) currentPlayer.value = players.value.last()
-        else currentPlayer.value = players.value.first()
+        Log.i("Player Turn Info", "${currentPlayer.value}")
+
+
+        if (currentPlayer.value == players.value.first()) {
+            currentPlayer.value = players.value.last()
+            Log.i("blals","true")
+        }
+        else {
+            currentPlayer.value = players.value.first()
+            Log.i("blals","false")
+        }
+
+        Log.i("Player Turn Info", "${currentPlayer.value}")
+
     }
 
 
