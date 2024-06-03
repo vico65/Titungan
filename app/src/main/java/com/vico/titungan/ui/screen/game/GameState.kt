@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.currentCompositionErrors
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,7 +49,10 @@ class GameState (
 
     var numberInput1: MutableState<String>,
     var numberInput2: MutableState<String>,
-    var selectedOperator: MutableState<String>
+    var selectedOperator: MutableState<String>,
+    var activeCell: MutableState<TitunganCell?>,
+    var isTimerRunning: MutableState<Boolean>,
+    var isPlayerInputRightValue: MutableState<Boolean>
 
     ) {
 
@@ -87,43 +91,56 @@ class GameState (
         gameCells.value = getEmptyBoard()
     }
 
-    fun playCell(
-        cell: TitunganCell
-    ) {
-        Log.d("GameState", "Playing cell at (${cell.x}, ${cell.y})")
-        checkIfGameIsFinished()
-        changeCellOwner(cell)
-        checkIfGameIsFinished()
+    fun checkWinStatus() {
+//        if(checkResult()) {
+//            addScore()
+//            activeCell.value?.let { changeCellOwner(it)}
+//            activeCell.value?.isActive = false
+//
+//            Log.i("Owner shape", "${gameCells.value.flatten().find { it.isActive }?.owner}")
+//        }
+
+        //waktunyo reset
+        isPlayerInputRightValue.value = true
+
+        currentPlayer.value?.life = currentPlayer.value?.life!! - 1
+//        addScore()
+        activeCell.value?.owner = currentPlayer.value
+        activeCell.value = null
+
+
+        changePlayer()
     }
 
-    fun changeActiveCell(
-        cell: TitunganCell
-    ) {
-        if (isVibrationOn)
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-        if (isSoundOn)
-            MediaPlayer.create(context, R.raw.pencil).start()
+    fun changeActiveCell(cell: TitunganCell) {activeCell.value = cell}
 
-        gameCells.value.flatten().find { it.isActive }?.isActive = false
-        cell.isActive = true
-    }
+    private fun addScore() {currentPlayer.value?.score = currentPlayer.value?.score!! + 1}
 
-    private fun changeCellOwner(
-        cell: TitunganCell
-    ) {
-
-
-        if (cell.owner == null && isGameStarted.value) {
-            Log.d("GameState", "Changing cell owner")
-            cell.owner = currentPlayer.value
-
-            Log.d("GameState", "Cell owner changed: ${cell.x}, ${cell.y}")
-
-            changePlayer()
-        } else {
-            Log.i("StatusPlayer", (cell.owner != null).toString())
+    private fun countResult (
+        number1 : Int = numberInput1.value.toInt(),
+        number2 : Int = numberInput2.value.toInt(),
+        operator: String = selectedOperator.value
+    ) : Int{
+        return when(operator) {
+            "+" -> number1 + number2
+            "-" -> number1 - number2
+            "x" -> number1 * number2
+            "/" -> number1 / number2
+            else -> {0}
         }
     }
+
+    fun checkResult(
+        result: Int? = gameCells.value.flatten().find { it.isActive }?.number
+    ) : Boolean {
+        return countResult() == result
+    }
+
+
+
+
+
+
     private fun prepareGameRules() {
         //harusny pake data store
         gameSize.intValue = gameDefaultSize
@@ -198,18 +215,8 @@ class GameState (
         else owner?.shape?.toShape() ?: RingShape
     }
 
-    fun addScore(
-//        player: Player,
-    ) {
-        Log.i("Player Turn", "Before is ${currentPlayer.value?.name} turn")
 
-        currentPlayer.value?.score = currentPlayer.value?.score!! + 1
-        changePlayer()
-
-        Log.i("Player score", "Score player 1 : ${players.value.get(0).score}")
-        Log.i("Player Turn", "Now is ${currentPlayer.value?.name} turn")
-    }
-    private fun changePlayer() {
+    fun changePlayer() {
         Log.i("Player Turn Info", "${currentPlayer.value}")
 
 
@@ -249,25 +256,9 @@ class GameState (
         return gameLogic?.findWinner()
     }
 
-     fun countResult (
-        number1 : Int = numberInput1.value.toInt(),
-        number2 : Int = numberInput2.value.toInt(),
-        operator: String = selectedOperator.value
-    ) : Int{
-        return when(operator) {
-            "+" -> number1 + number2
-            "-" -> number1 - number2
-            "x" -> number1 * number2
-            "/" -> number1 / number2
-            else -> {0}
-        }
-    }
 
-    fun checkResult(
-        result: Int? = gameCells.value.flatten().find { it.isActive }?.number
-    ) : Boolean {
-        return countResult() == result
-    }
+
+
 
 
 }
@@ -291,7 +282,10 @@ fun rememberHomeState(
     },
     selectedOperator: MutableState<String> = rememberSaveable {
         mutableStateOf("+")
-    }
+    },
+    activeCell: MutableState<TitunganCell?> = rememberSaveable { mutableStateOf(null) },
+    isTimerRunning: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) },
+    isPlayerInputRightValue: MutableState<Boolean> = rememberSaveable {mutableStateOf(false)}
 //    isGameDrew: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 //    isRollingDices: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 //        firstPlayerPolicy: MutableState<FirstPlayerPolicy> = rememberSaveable {
@@ -311,7 +305,9 @@ fun rememberHomeState(
     winner,
     numberInput1,
     numberInput2,
-    selectedOperator
+    selectedOperator,
+    activeCell,
+    isTimerRunning
 ) {
     GameState(
         hapticFeedback,
@@ -327,7 +323,11 @@ fun rememberHomeState(
 //            firstPlayerPolicy,
         numberInput1,
         numberInput2,
-        selectedOperator
+        selectedOperator,
+        activeCell,
+
+        isTimerRunning,isPlayerInputRightValue
+
     )
 }
 

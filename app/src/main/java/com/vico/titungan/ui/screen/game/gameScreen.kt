@@ -59,7 +59,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -74,6 +76,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -88,6 +91,7 @@ import com.vico.titungan.model.TitunganCell
 import com.vico.titungan.ui.component.ScoreBoard
 import com.vico.titungan.ui.theme.TitunganTheme
 import com.vico.titungan.ui.theme.fontFamilyFredoka
+import kotlinx.coroutines.delay
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
@@ -119,8 +123,6 @@ fun GameScreen(
     Scaffold (
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = { contentPadding ->
-
-
             Surface (
                 modifier = Modifier
                     .fillMaxSize()
@@ -134,11 +136,51 @@ fun GameScreen(
                             .padding(vertical = 16.dp)
                             .verticalScroll(rememberScrollState()),
                         content = {
+                            var totalTime = 30
+                            var isRunning = true
+                            var timeLeft by remember { mutableIntStateOf(totalTime) }
+
+                            LaunchedEffect(isRunning) {
+                                while (isRunning) {
+                                    for (second in totalTime downTo 0) {
+                                        timeLeft = second
+
+                                        if(gameState.isPlayerInputRightValue.value) {
+                                            gameState.isPlayerInputRightValue.value = false
+                                            timeLeft = totalTime
+                                            break
+                                        }
+
+                                        delay(1000L)
+                                    }
+
+                                    //waktu dio abes
+                                    if (timeLeft == 0) {
+                                        gameState.changePlayer()
+                                        timeLeft = totalTime
+                                    }
+                                }
+                            }
+
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .background(color = Color(0xFF01579B), shape = CircleShape)
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "$timeLeft",
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        fontSize = 24.sp
+                                    )
+                                )
+                            }
+
                             AnimatedVisibility(
                                 visible = true,
                                 content = {
-
-                                    Log.i("Info current", "current player is = ${gameState.currentPlayer.value?.name} ")
                                     ScoreBoard(
                                         players = gameState.players.value,
                                         currentPlayer = gameState.currentPlayer.value
@@ -155,6 +197,7 @@ fun GameScreen(
                                         gameSize = gameState.gameSize.intValue,
                                         gameCells = gameState.gameCells.value,
                                         isGameFinished = gameState.isGameFinished.value,
+                                        activeCell = gameState.activeCell.value,
                                         shapeProvider = gameState::getOwnerShape,
                                         onItemClick = gameState::changeActiveCell
                                     )
@@ -244,11 +287,11 @@ fun GameScreen(
                                                 )
                                             )
 
+                                            //ini adalah button hasil
                                             Button(
                                                 onClick = {
-
-                                                          gameState.addScore()
-
+                                                    Log.i("apakah player input right value", gameState.isPlayerInputRightValue.value.toString())
+                                                          gameState.checkWinStatus()
                                                 },
                                                 modifier = Modifier // Besar ikon
                                                     .padding(start = 16.dp)
@@ -294,6 +337,7 @@ private fun GameBoard(
     gameSize: Int,
     gameCells: List<List<TitunganCell>>,
     isGameFinished: Boolean,
+    activeCell: TitunganCell?,
     shapeProvider: (Player?) -> Shape,
     onItemClick: (TitunganCell) -> Unit
 ) {
@@ -302,8 +346,6 @@ private fun GameBoard(
     val boxSize = screenWidth - (2 * boxPadding.value).dp
     val itemMargin = 6.dp
     val boxItemSize = ((boxSize.value - ((itemMargin.value * (gameSize - 1)))) / gameSize).dp
-
-    var activeCell by remember { mutableStateOf<TitunganCell?>(null) }
 
     LazyVerticalGrid(
         modifier = Modifier.size(boxSize),
@@ -315,13 +357,14 @@ private fun GameBoard(
 
             gameCells.forEachIndexed { _, row ->
                 itemsIndexed(row) { _, cell ->
-                    Log.i("cell owner", (cell.owner == null).toString())
 
                     val backgroundColorAnimated by animateColorAsState(
-                        targetValue = if (cell == activeCell) Color.Green else MaterialTheme.colorScheme.primary,
+                        targetValue = if (cell == activeCell) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
                         animationSpec = tween(durationMillis = 300),
                         label = "backgroundColorAnimated"
                     )
+
+                    Log.d("Cell Owner", "${cell.owner != null}")
 
                     TitunganItem(
                         cell,
@@ -332,9 +375,7 @@ private fun GameBoard(
                         onClick = {
                             Log.d("GameBoard", "Cell clicked at (${cell.x}, ${cell.y} and has active = ${cell.isActive}")
 
-                            activeCell?.isActive = false
-                            cell.isActive = true
-                            activeCell = cell
+
                             onItemClick(cell)
                                   },
                         backgroundColor = backgroundColorAnimated,
@@ -371,6 +412,8 @@ private fun TitunganItem(
             ),
         contentAlignment = Alignment.Center,
         content = {
+            Log.i("Status compose", "has owner = $hasOwner")
+
             AnimatedVisibility(
 
                 visible = !hasOwner,

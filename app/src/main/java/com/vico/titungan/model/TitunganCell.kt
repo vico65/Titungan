@@ -1,6 +1,7 @@
 package com.vico.titungan.model
 
 import android.os.Parcelable
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

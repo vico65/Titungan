@@ -1,8 +1,18 @@
 import android.os.CountDownTimer
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -15,50 +25,51 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.delay
 
+
 @Composable
-fun CountdownTimer(
-    totalTime: Int = 30, // Total countdown time in seconds
-    modifier: Modifier = Modifier,
-    onTimeUp: () -> Unit = {}
-) {
-    var timeLeft by remember { mutableStateOf(totalTime) }
-    var isRunning by remember { mutableStateOf(true) }
-
-    LaunchedEffect(isRunning) {
-        if (isRunning) {
-            for (second in totalTime downTo 0) {
-                timeLeft = second
-                delay(1000L)
-            }
-            onTimeUp()
-            isRunning = false
-        }
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .background(color = Color(0xFF01579B), shape = CircleShape)
-            .padding(16.dp)
+fun LivesInfo(playerLives: List<Int>) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
     ) {
         Text(
-            text = "$timeLeft",
-            style = MaterialTheme.typography.headlineMedium.copy(
+            text = "Lives",
+            style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
-                fontSize = 24.sp
+                color = Color.Black
             )
         )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            playerLives.forEachIndexed { index, lives ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    repeat(lives) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = Color.Red,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    if (index < playerLives.size - 1) {
+                        Spacer(modifier = Modifier.width(32.dp))
+                    }
+                }
+            }
+        }
     }
 }
 
 @Preview
 @Composable
 fun CountdownTimerPreview() {
-    CountdownTimer(
-        totalTime = 30,
-        modifier = Modifier.padding(16.dp)
-    )
+    LivesInfo(listOf(1,3))
 }
 
 //@Composable

@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -23,11 +27,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.ContentAlpha
 import com.vico.titungan.model.Player
 import com.vico.titungan.ui.theme.fontFamilyFredoka
+
+@Preview
+@Composable
+fun CountdownTimerPreview() {
+    var player1 = Player("Player 1", "xShape")
+    var player2 = Player("Player 2", "ringShape")
+    var Players = listOf(player1, player2)
+    ScoreBoard(players = Players, currentPlayer = player1)
+}
 
 @Composable
 internal fun ScoreBoard(
@@ -37,32 +51,44 @@ internal fun ScoreBoard(
     val firstPlayer = players[0]
     val secondPlayer = players[1]
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        PlayerScore(
-            player = firstPlayer,
-            playerColor = Color(0xFF64B5F6), // Blue color
-            scoreColor = Color.White,
-            isCurrentPlayer = firstPlayer == currentPlayer
-        )
-        Text(
-            text = "vs",
-            color = Color.Gray,
-            fontSize = 24.sp,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        )
-        PlayerScore(
-            player = secondPlayer,
-            playerColor = Color(0xFFE57373), // Red color
-            scoreColor = Color.White,
-            isCurrentPlayer = secondPlayer == currentPlayer
-        )
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            PlayerScore(
+                player = firstPlayer,
+                playerColor = Color(0xFF64B5F6), // Blue color
+                scoreColor = Color.White,
+                isCurrentPlayer = firstPlayer == currentPlayer
+            )
+            Text(
+                text = "vs",
+                color = Color.Gray,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            PlayerScore(
+                player = secondPlayer,
+                playerColor = Color(0xFFE57373), // Red color
+                scoreColor = Color.White,
+                isCurrentPlayer = secondPlayer == currentPlayer
+            )
+
+
+        }
+
     }
+
+
 }
 
 @Composable
@@ -75,24 +101,32 @@ internal fun PlayerScore(
 ) {
     val alpha = if (isCurrentPlayer) ContentAlpha.high else ContentAlpha.disabled
 
-    Row(
+    Column(
         modifier = modifier
             .animateContentSize()
             .alpha(alpha),
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
 
-        if(player.name == "Player 1") {
-            playerNamePanel(playerColor = playerColor, player = player)
-            Spacer(modifier = Modifier.width(8.dp))
-            playerSkorPanel(playerColor = playerColor, player = player, scoreColor = scoreColor)
-        } else {
-            playerSkorPanel(playerColor = playerColor, player = player, scoreColor = scoreColor)
-            Spacer(modifier = Modifier.width(8.dp))
-            playerNamePanel(playerColor = playerColor, player = player)
-
+            if(player.name == "Player 1") {
+                playerNamePanel(playerColor = playerColor, player = player)
+                Spacer(modifier = Modifier.width(8.dp))
+                playerSkorPanel(playerColor = playerColor, player = player, scoreColor = scoreColor)
+            } else {
+                playerSkorPanel(playerColor = playerColor, player = player, scoreColor = scoreColor)
+                Spacer(modifier = Modifier.width(8.dp))
+                playerNamePanel(playerColor = playerColor, player = player)
+            }
         }
+
+        // Add lives below the score
+        PlayerLives(playerLives = player.life)
     }
+
+
 }
 
 @Composable
@@ -142,6 +176,26 @@ fun playerSkorPanel(
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+@Composable
+fun PlayerLives(playerLives: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .padding(top = 8.dp)
+    ) {
+        repeat(playerLives) {
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = null,
+                tint = Color.Red,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
     }
 }
 
