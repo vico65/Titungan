@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -88,6 +90,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.MaterialTheme.colors
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
+import com.vico.titungan.ui.component.AnimatingText
 import com.vico.titungan.ui.component.ScoreBoard
 import com.vico.titungan.ui.theme.TitunganTheme
 import com.vico.titungan.ui.theme.fontFamilyFredoka
@@ -162,21 +165,7 @@ fun GameScreen(
                                 }
                             }
 
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .background(color = Color(0xFF01579B), shape = CircleShape)
-                                    .padding(16.dp)
-                            ) {
-                                Text(
-                                    text = "$timeLeft",
-                                    style = MaterialTheme.typography.headlineMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        fontSize = 24.sp
-                                    )
-                                )
-                            }
+                            CountDownTimer(timeLeft = timeLeft)
 
                             AnimatedVisibility(
                                 visible = true,
@@ -187,6 +176,8 @@ fun GameScreen(
                                     )
                                 }
                             )
+
+
 
                             AnimatedVisibility(
                                 visible = gameState.isGameStarted.value,
@@ -448,6 +439,36 @@ private fun TitunganItem(
     )
 }
 
+@Composable
+internal fun CountDownTimer(
+    modifier: Modifier = Modifier,
+    timeLeft : Int
+) {
+    Row(
+        modifier = modifier
+            .width(60.dp)
+            .clip(RoundedCornerShape(100))
+            .background(color = MaterialTheme.colorScheme.background)
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = RoundedCornerShape(100),
+            )
+            .padding(
+                horizontal = 16.dp,
+                vertical = 8.dp,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End,
+    ) {
+        AnimatingText(
+            modifier = Modifier
+                .wrapContentSize()
+                .weight(1f),
+            time = timeLeft.toString()
+        )
+    }
+}
 
 @Composable
 fun LockScreenOrientation(orientation: Int) {

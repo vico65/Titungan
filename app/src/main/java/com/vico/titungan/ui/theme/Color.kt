@@ -11,4 +11,12 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 val purple500 = Color(0xFF6200EE)
 
-val light_flirtContainer = Color(0xFFffd8e8)
+val White = Color(0xFFFFFFFF)
+
+val Grey = Color(0XFF202124)
+val Blue = Color(0XFF538EF7)
+val BluePastel = Color(0XFF8BB4F7)
+val Green = Color(0XFF64B866)
+val GreenPastel = Color(0XFF81C995)
+val Salmon = Color(0XFFEC5E4F)
+val SalmonPastel = Color(0XFFF28B82)

@@ -2,15 +2,28 @@ package com.vico.titungan.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.vico.titungan.R
 
-// Set of Material typography styles to start with
+private val FredokaFontFamily = FontFamily(
+    Font(R.font.fredoka_light, FontWeight.Thin),
+    Font(R.font.fredoka_light, FontWeight.ExtraLight),
+    Font(R.font.fredoka_light, FontWeight.Light),
+    Font(R.font.fredoka_regular, FontWeight.Normal),
+    Font(R.font.fredoka_medium, FontWeight.Medium),
+    Font(R.font.fredoka_semi_bold, FontWeight.SemiBold),
+    Font(R.font.fredoka_bold, FontWeight.Bold),
+    Font(R.font.fredoka_bold, FontWeight.ExtraBold),
+    Font(R.font.fredoka_bold, FontWeight.Black),
+)
+
 val Typography = Typography(
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
+        fontFamily = FredokaFontFamily,
+        fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
