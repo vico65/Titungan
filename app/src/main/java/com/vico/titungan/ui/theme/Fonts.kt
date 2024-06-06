@@ -15,10 +15,10 @@ val provider = GoogleFont.Provider(
 
 val fredokaOneFont = GoogleFont("fredokaOneFont")
 
-val fontFamilyFredoka = FontFamily(
-    Font(
-        googleFont = fredokaOneFont,
-        fontProvider = provider,
-        weight = FontWeight.Bold
-    )
-)
+//val fontFamilyFredoka = FontFamily(
+//    Font(
+//        googleFont = fredokaOneFont,
+//        fontProvider = provider,
+//        weight = FontWeight.Bold
+//    )
+//)

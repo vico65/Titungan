@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.vico.titungan.R
 
-private val FredokaFontFamily = FontFamily(
+val FredokaFontFamily = FontFamily(
     Font(R.font.fredoka_light, FontWeight.Thin),
     Font(R.font.fredoka_light, FontWeight.ExtraLight),
     Font(R.font.fredoka_light, FontWeight.Light),

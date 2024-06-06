@@ -3,6 +3,7 @@ package com.vico.titungan.ui.component
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,13 +27,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.ContentAlpha
 import com.vico.titungan.model.Player
-import com.vico.titungan.ui.theme.fontFamilyFredoka
+import com.vico.titungan.ui.theme.DarkRed
+import com.vico.titungan.ui.theme.FredokaFontFamily
+import com.vico.titungan.ui.theme.Green
+import com.vico.titungan.ui.theme.Salmon
 
 @Preview
 @Composable
@@ -66,8 +71,6 @@ internal fun ScoreBoard(
         ) {
             PlayerScore(
                 player = firstPlayer,
-                playerColor = Color(0xFF64B5F6), // Blue color
-                scoreColor = Color.White,
                 isCurrentPlayer = firstPlayer == currentPlayer
             )
             Text(
@@ -78,8 +81,6 @@ internal fun ScoreBoard(
             )
             PlayerScore(
                 player = secondPlayer,
-                playerColor = Color(0xFFE57373), // Red color
-                scoreColor = Color.White,
                 isCurrentPlayer = secondPlayer == currentPlayer
             )
 
@@ -95,86 +96,102 @@ internal fun ScoreBoard(
 internal fun PlayerScore(
     modifier : Modifier = Modifier,
     player: Player,
-    playerColor: Color,
-    scoreColor: Color,
     isCurrentPlayer: Boolean = true
 ) {
     val alpha = if (isCurrentPlayer) ContentAlpha.high else ContentAlpha.disabled
 
-    Column(
-        modifier = modifier
-            .animateContentSize()
-            .alpha(alpha),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+
         Row(
+            modifier = modifier
+                .animateContentSize()
+                .alpha(alpha),
             verticalAlignment = Alignment.CenterVertically,
         ) {
 
             if(player.name == "Player 1") {
-                playerNamePanel(playerColor = playerColor, player = player)
+                playerNamePanel(player = player)
                 Spacer(modifier = Modifier.width(8.dp))
-                playerSkorPanel(playerColor = playerColor, player = player, scoreColor = scoreColor)
+                playerSkorPanel(player = player)
             } else {
-                playerSkorPanel(playerColor = playerColor, player = player, scoreColor = scoreColor)
+                playerSkorPanel(player = player)
                 Spacer(modifier = Modifier.width(8.dp))
-                playerNamePanel(playerColor = playerColor, player = player)
+                playerNamePanel(player = player)
             }
         }
 
-        // Add lives below the score
-        PlayerLives(playerLives = player.life)
-    }
+
+
 
 
 }
 
 @Composable
 fun playerNamePanel(
-    playerColor: Color,
     player : Player
 ) {
-    Box(
-        modifier = Modifier
-            .background(playerColor, RoundedCornerShape(16.dp))
-            .padding(horizontal = 14.dp, vertical = 8.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        Box(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background, RoundedCornerShape(16.dp))
+                .border(
+                    width = 2.dp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    shape = RoundedCornerShape(100),
+                )
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 8.dp,
+                )
         ) {
-            player.shape?.toShape()?.let { shape -> ShapePreview(shape, 20.dp) }
 
-            Text(
-                text = player.name,
-                color = Color.White,
-                fontSize = 16.sp,
-                style = MaterialTheme.typography.bodyLarge.copy(fontFamily = fontFamilyFredoka),
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                player.shape?.toShape()?.let { shape ->
+                    if (shape == XShape) ShapePreview(shape, 20.dp, Green)
+                    else ShapePreview(shape, 20.dp, Salmon)
+                }
+
+                Text(
+                    text = player.name,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
         }
 
+        PlayerLives(playerLives = player.life)
     }
 }
 
 @Composable
 fun playerSkorPanel(
-    playerColor: Color,
     player : Player,
-    scoreColor: Color
 ) {
     Box(
         modifier = Modifier
             .size(32.dp)
-            .background(playerColor, CircleShape),
+            .background(MaterialTheme.colorScheme.background, CircleShape)
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = RoundedCornerShape(100),
+            ),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = player.score.toString(),
-            color = scoreColor,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 18.sp,
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -185,16 +202,16 @@ fun PlayerLives(playerLives: Int) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
-            .padding(top = 8.dp)
+            .padding(8.dp)
     ) {
         repeat(playerLives) {
             Icon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
-                tint = Color.Red,
-                modifier = Modifier.size(16.dp)
+                tint = DarkRed,
+                modifier = Modifier.size(18.dp)
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(6.dp))
         }
     }
 }

@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
 import android.os.CountDownTimer
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -13,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +37,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -88,12 +91,14 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.MaterialTheme.colors
+import com.vico.titungan.R
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
 import com.vico.titungan.ui.component.AnimatingText
 import com.vico.titungan.ui.component.ScoreBoard
+import com.vico.titungan.ui.theme.BluePastel
+import com.vico.titungan.ui.theme.FredokaFontFamily
 import com.vico.titungan.ui.theme.TitunganTheme
-import com.vico.titungan.ui.theme.fontFamilyFredoka
 import kotlinx.coroutines.delay
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
@@ -205,33 +210,47 @@ fun GameScreen(
 
                                     Column (
                                         modifier = Modifier
-                                            .padding(10.dp)
+                                            .padding(8.dp)
                                             .fillMaxWidth(),
                                         verticalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
-                                            // Input angka pertama
+
                                             OutlinedTextField(
                                                 value = gameState.numberInput1.value,
                                                 onValueChange = { gameState.numberInput1.value = it },
-                                                label = { Text("Angka 1", color = Color.Gray) },
+                                                placeholder = {
+                                                    Text(stringResource(id = R.string.input_number_1_name),
+                                                        color = Color.Gray)
+                                                },
                                                 modifier = Modifier
                                                     .weight(2f)
-                                                    .height(56.dp), // Tinggi yang lebih besar
-                                                textStyle = TextStyle(color = Color.Black),
+                                                    .height(50.dp)
+                                                    .border(
+                                                        width = 3.dp,
+                                                        color = MaterialTheme.colorScheme.onBackground,
+                                                        shape = RoundedCornerShape(100),
+                                                    ),
+                                                textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
                                                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                                                    focusedBorderColor = Color(0xFF01579B), // Warna biru yang cerah saat fokus
-                                                    unfocusedBorderColor = Color(0xFF01579B).copy(alpha = 0.3f), // Warna biru yang cerah saat tidak fokus
-                                                    cursorColor = Color(0xFF01579B) // Warna kursor biru yang cerah
-                                                )// Warna teks hitam
+                                                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                                                    unfocusedBorderColor = Color.Transparent,
+                                                    cursorColor = Color(0xFF01579B)
+                                                ),
+                                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                             )
 
-                                            // Dropdown menu untuk operator
                                             Box(
                                                 modifier = Modifier
                                                     .weight(1f)
+                                                    .border(
+                                                        width = 3.dp,
+                                                        color = MaterialTheme.colorScheme.onBackground,
+                                                        shape = RoundedCornerShape(100),
+                                                    )
                                                     .clickable { expanded = true },
                                                 contentAlignment = Alignment.Center
                                             ) {
@@ -239,7 +258,7 @@ fun GameScreen(
                                                     gameState.selectedOperator.value,
                                                     modifier = Modifier.padding(10.dp),
                                                     style = TextStyle(
-                                                        color = Color(0xFF01579B), // Warna biru yang cerah
+                                                        color = MaterialTheme.colorScheme.primary,
                                                         fontSize = 24.sp
                                                     )
                                                 )
@@ -254,7 +273,7 @@ fun GameScreen(
                                                         }, text = { Text(
                                                             operator,
                                                             style = TextStyle(
-                                                                color = Color(0xFF01579B), // Warna biru yang cerah
+                                                                color = MaterialTheme.colorScheme.primary,
                                                                 fontSize = 16.sp
                                                             )
                                                         )})
@@ -262,20 +281,28 @@ fun GameScreen(
                                                 }
                                             }
 
-                                            // Input angka kedua
                                             OutlinedTextField(
                                                 value = gameState.numberInput2.value,
                                                 onValueChange = { gameState.numberInput2.value = it },
-                                                label = { Text("Angka 2", color = Color.Gray) },
+                                                placeholder = {
+                                                    Text(stringResource(id = R.string.input_number_2_name),
+                                                        color = Color.Gray)
+                                                },
                                                 modifier = Modifier
                                                     .weight(2f)
-                                                    .height(56.dp), // Tinggi yang lebih besar
-                                                textStyle = TextStyle(color = Color.Black),
+                                                    .height(50.dp)
+                                                    .border(
+                                                        width = 3.dp,
+                                                        color = MaterialTheme.colorScheme.onBackground,
+                                                        shape = RoundedCornerShape(100),
+                                                    ),
+                                                textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
                                                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                                                    focusedBorderColor = Color(0xFF01579B),
-                                                    unfocusedBorderColor = Color(0xFF01579B).copy(alpha = 0.3f),
+                                                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                                                    unfocusedBorderColor = Color.Transparent,
                                                     cursorColor = Color(0xFF01579B)
-                                                )
+                                                ),
+                                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                             )
 
                                             //ini adalah button hasil
@@ -335,7 +362,7 @@ private fun GameBoard(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val boxPadding = 16.dp
     val boxSize = screenWidth - (2 * boxPadding.value).dp
-    val itemMargin = 6.dp
+    val itemMargin = 4.dp
     val boxItemSize = ((boxSize.value - ((itemMargin.value * (gameSize - 1)))) / gameSize).dp
 
     LazyVerticalGrid(
@@ -355,20 +382,13 @@ private fun GameBoard(
                         label = "backgroundColorAnimated"
                     )
 
-                    Log.d("Cell Owner", "${cell.owner != null}")
-
                     TitunganItem(
                         cell,
                         clickable = !isGameFinished && cell.owner == null,
                         shape = shapeProvider(cell.owner),
                         size = boxItemSize,
                         hasOwner = cell.owner != null,
-                        onClick = {
-                            Log.d("GameBoard", "Cell clicked at (${cell.x}, ${cell.y} and has active = ${cell.isActive}")
-
-
-                            onItemClick(cell)
-                                  },
+                        onClick = { onItemClick(cell) },
                         backgroundColor = backgroundColorAnimated,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
@@ -393,11 +413,15 @@ private fun TitunganItem(
     Box(
         modifier = Modifier
             .size(size)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(backgroundColor)
+            .border(
+                width = 4.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(color = Color(0xFF81D4FA)),
+                indication = rememberRipple(color = BluePastel),
                 enabled = clickable,
                 onClick = onClick
             ),
@@ -413,8 +437,9 @@ private fun TitunganItem(
                         Text(
                             text = cell.number.toString(),
                             color = Color.White,
-                            style = MaterialTheme.typography.displayLarge.copy(fontFamily = fontFamilyFredoka),
+                            style = MaterialTheme.typography.displayLarge,
                             fontSize = 28.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
