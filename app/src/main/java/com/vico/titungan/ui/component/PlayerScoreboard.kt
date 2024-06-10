@@ -1,5 +1,6 @@
 package com.vico.titungan.ui.component
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -92,6 +93,7 @@ internal fun ScoreBoard(
 
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 internal fun PlayerScore(
     modifier : Modifier = Modifier,

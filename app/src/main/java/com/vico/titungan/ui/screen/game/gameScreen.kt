@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.annotation.StringRes
@@ -103,7 +104,7 @@ import kotlinx.coroutines.delay
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun GameScreenPreview() {
     var navController: NavHostController = rememberNavController()
@@ -236,7 +237,7 @@ fun GameScreen(
                                                     ),
                                                 textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
                                                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                                                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                                                    focusedBorderColor = Color.Transparent,
                                                     unfocusedBorderColor = Color.Transparent,
                                                     cursorColor = Color(0xFF01579B)
                                                 ),
@@ -245,21 +246,16 @@ fun GameScreen(
 
                                             Box(
                                                 modifier = Modifier
-                                                    .weight(1f)
-                                                    .border(
-                                                        width = 3.dp,
-                                                        color = MaterialTheme.colorScheme.onBackground,
-                                                        shape = RoundedCornerShape(100),
-                                                    )
+                                                    .weight(0.5f)
                                                     .clickable { expanded = true },
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
                                                     gameState.selectedOperator.value,
-                                                    modifier = Modifier.padding(10.dp),
+                                                    modifier = Modifier.padding(4.dp),
                                                     style = TextStyle(
                                                         color = MaterialTheme.colorScheme.primary,
-                                                        fontSize = 24.sp
+                                                        fontSize = 26.sp
                                                     )
                                                 )
                                                 DropdownMenu(
@@ -298,29 +294,35 @@ fun GameScreen(
                                                     ),
                                                 textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
                                                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                                                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                                                    focusedBorderColor = Color.Transparent,
                                                     unfocusedBorderColor = Color.Transparent,
-                                                    cursorColor = Color(0xFF01579B)
+                                                    cursorColor = MaterialTheme.colorScheme.primary
                                                 ),
                                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                             )
 
-                                            //ini adalah button hasil
                                             Button(
-                                                onClick = {
-                                                    Log.i("apakah player input right value", gameState.isPlayerInputRightValue.value.toString())
-                                                          gameState.checkWinStatus()
-                                                },
-                                                modifier = Modifier // Besar ikon
-                                                    .padding(start = 16.dp)
-                                                    .weight(2f), // Spasi di sekitar tombol
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = Color(0xFF01579B),
-                                                    contentColor = Color.White
+                                                onClick = { gameState.checkWinStatus() },
+                                                border = BorderStroke(
+                                                    width = 3.dp,
+                                                    color = MaterialTheme.colorScheme.onBackground,
                                                 ),
-                                                shape = CircleShape // Bentuk tombol bulat
+                                                modifier = Modifier
+                                                    .padding(start = 16.dp)
+                                                    .weight(2f),
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                ),
+                                                shape = CircleShape
                                             ) {
-                                                Icon(Icons.Default.PlayArrow, contentDescription = "Hitung")
+                                                Text(
+                                                    text = "Cek",
+                                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                                        fontSize = 20.sp,
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.background,
+                                                    )
+                                                )
                                             }
                                         }
                                     }
