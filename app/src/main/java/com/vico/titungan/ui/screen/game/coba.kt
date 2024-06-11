@@ -54,7 +54,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
+import com.vico.titungan.R
 import com.vico.titungan.ui.component.AnimatingText
+import com.vico.titungan.ui.theme.yellow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -336,6 +338,17 @@ internal fun DifficultyItem(
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(color = MaterialTheme.colorScheme.error)
+                        .padding(4.dp),
+                    painter = painterResource(id = R.drawable.bolt),
+                    tint = yellow,
+                    contentDescription = null,
+                )
             }
         }
     }

@@ -2,6 +2,7 @@ package com.vico.titungan.ui.screen
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -39,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +49,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,12 +64,15 @@ import androidx.navigation.compose.rememberNavController
 import com.vico.titungan.R
 import com.vico.titungan.domain.navigation.Screen
 import com.vico.titungan.ui.component.AppButton
+import com.vico.titungan.ui.component.HighlightedRoundedButton
+import com.vico.titungan.ui.component.RoundedButton
 import com.vico.titungan.ui.component.displayLarge
 import com.vico.titungan.ui.theme.TitunganTheme
 import com.vico.titungan.ui.theme.border2dp
 import com.vico.titungan.ui.theme.padding16dp
 import com.vico.titungan.ui.theme.width248dp
 import com.vico.titungan.ui.theme.padding64dp
+import com.vico.titungan.ui.theme.yellow
 import kotlinx.coroutines.launch
 
 @Preview(showBackground = true)
@@ -112,11 +119,12 @@ fun MenuScreen(navController: NavHostController) {
 //    }
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
+    val canResume = remember { mutableStateOf(false) }
     val _difficultyItems: MutableState<List<GameCategoryItem>> = mutableStateOf(listOf(
         GameCategoryItem(
             title = "Quick Game",
             isGameInProgress = false,
-            message = "Mainkan game cepat dengan batas skor 5"
+            message = "7 x 7"
         ),
         GameCategoryItem(
             title = "Custom",
@@ -170,9 +178,89 @@ fun MenuScreen(navController: NavHostController) {
                                  },
             )
         }
+
+        GameButtons(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            canResume = canResume,
+            onStartClicked = {
+                //                val item = difficulties.value[pagerState.currentPage].difficulty
+                //
+            },
+            onResumeClicked = {
+                //                val item = difficulties.value[pagerState.currentPage].difficulty
+                //                onResumeClicked(item)
+            },
+            onSettingsClicked = {  },
+        )
     }
 
 
+}
+
+@Composable
+fun GameButtons(
+    modifier: Modifier = Modifier,
+    canResume: State<Boolean>,
+    onStartClicked: () -> Unit,
+    onResumeClicked: () -> Unit,
+    onSettingsClicked: () -> Unit,
+) {
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+    ) {
+
+        RoundedButton(
+            modifier = Modifier
+                .wrapContentSize(),
+            text = "New game",
+            onClick = onStartClicked,
+        )
+
+        AnimatedVisibility(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            visible = canResume.value,
+        ) {
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                HighlightedRoundedButton(
+                    modifier = Modifier
+                        .wrapContentSize(),
+                    text = "Resume",
+                    onClick = onResumeClicked,
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.weight(1f),
+        )
+
+        RoundedButton(
+            modifier = Modifier
+                .wrapContentSize(),
+            text = "Settings",
+            onClick = onSettingsClicked,
+        )
+
+        val padding = 20.dp + 32.dp
+
+        Spacer(
+            modifier = Modifier.height(padding),
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -334,7 +422,6 @@ internal fun GameCategoryItem(
 
             Text(
                 modifier = Modifier
-                    .wrapContentSize()
                     .wrapContentSize(),
                 text = category.message,
                 textAlign = TextAlign.Center,
@@ -344,6 +431,34 @@ internal fun GameCategoryItem(
                     fontWeight = FontWeight.Light
                 ),
             )
+
+            Row {
+
+                Text(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .wrapContentSize()
+                        .align(alignment = Alignment.CenterVertically),
+                    text = "Game cepat, 5 skor maks",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Light
+                    ),
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(color = Color.Transparent),
+                    painter = painterResource(id = R.drawable.bolt),
+                    tint = yellow,
+                    contentDescription = null,
+                )
+            }
         }
     }
 }

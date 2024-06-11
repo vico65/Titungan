@@ -59,6 +59,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -70,6 +72,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,11 +99,13 @@ import com.vico.titungan.R
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
 import com.vico.titungan.ui.component.AnimatingText
+import com.vico.titungan.ui.component.RingShape
 import com.vico.titungan.ui.component.ScoreBoard
 import com.vico.titungan.ui.theme.BluePastel
 import com.vico.titungan.ui.theme.FredokaFontFamily
 import com.vico.titungan.ui.theme.TitunganTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
@@ -129,7 +134,11 @@ fun GameScreen(
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold (
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = { contentPadding ->
             Surface (
@@ -165,6 +174,7 @@ fun GameScreen(
 
                                     //waktu dio abes
                                     if (timeLeft == 0) {
+                                        gameState.currentPlayer.value?.life = gameState.currentPlayer.value?.life!! - 1
                                         gameState.changePlayer()
                                         timeLeft = totalTime
                                     }
@@ -302,7 +312,20 @@ fun GameScreen(
                                             )
 
                                             Button(
-                                                onClick = { gameState.checkWinStatus() },
+                                                enabled = (gameState.numberInput1.value.isNotEmpty() && gameState.numberInput2.value.isNotEmpty()),
+                                                onClick = {
+                                                    gameState.checkWinStatus()
+                                                    gameState.isPlayerInputRightValue.value = true
+
+                                                    if (gameState.showSnackbar.value) {
+                                                        scope.launch {
+                                                            snackbarHostState.showSnackbar(
+                                                                message = "Ini adalah Snackbar!"
+                                                            )
+                                                            gameState.showSnackbar.value = false
+                                                        }
+                                                    }
+                                                          },
                                                 border = BorderStroke(
                                                     width = 3.dp,
                                                     color = MaterialTheme.colorScheme.onBackground,
@@ -379,7 +402,13 @@ private fun GameBoard(
                 itemsIndexed(row) { _, cell ->
 
                     val backgroundColorAnimated by animateColorAsState(
-                        targetValue = if (cell == activeCell) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
+                        targetValue =
+                            if (cell == activeCell)
+                                MaterialTheme.colorScheme.secondary
+                            else if (cell.owner != null)
+                                Color.Transparent
+                            else
+                                MaterialTheme.colorScheme.primary,
                         animationSpec = tween(durationMillis = 300),
                         label = "backgroundColorAnimated"
                     )
@@ -392,7 +421,6 @@ private fun GameBoard(
                         hasOwner = cell.owner != null,
                         onClick = { onItemClick(cell) },
                         backgroundColor = backgroundColorAnimated,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -408,7 +436,6 @@ private fun TitunganItem(
     size: Dp,
     hasOwner: Boolean,
     backgroundColor: Color,
-    contentColor: Color,
     onClick: () -> Unit
 ) {
 
@@ -418,7 +445,7 @@ private fun TitunganItem(
             .clip(RoundedCornerShape(6.dp))
             .background(backgroundColor)
             .border(
-                width = 4.dp,
+                width = if(hasOwner) 2.dp else 4.dp,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             .clickable(
@@ -429,10 +456,7 @@ private fun TitunganItem(
             ),
         contentAlignment = Alignment.Center,
         content = {
-            Log.i("Status compose", "has owner = $hasOwner")
-
             AnimatedVisibility(
-
                 visible = !hasOwner,
                 content = {
                     if (!hasOwner) {
@@ -457,7 +481,9 @@ private fun TitunganItem(
                             modifier = Modifier
                                 .size((size.value / 2).dp)
                                 .clip(shape)
-                                .background(contentColor),
+                                .background(
+                                    if (shape == RingShape) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error
+                                ),
                         )
                     }
                 }

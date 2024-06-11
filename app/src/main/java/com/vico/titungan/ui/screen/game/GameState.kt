@@ -52,7 +52,8 @@ class GameState (
     var selectedOperator: MutableState<String>,
     var activeCell: MutableState<TitunganCell?>,
     var isTimerRunning: MutableState<Boolean>,
-    var isPlayerInputRightValue: MutableState<Boolean>
+    var isPlayerInputRightValue: MutableState<Boolean>,
+    var showSnackbar : MutableState<Boolean>
 
     ) {
 
@@ -92,23 +93,17 @@ class GameState (
     }
 
     fun checkWinStatus() {
-//        if(checkResult()) {
-//            addScore()
-//            activeCell.value?.let { changeCellOwner(it)}
-//            activeCell.value?.isActive = false
-//
-//            Log.i("Owner shape", "${gameCells.value.flatten().find { it.isActive }?.owner}")
-//        }
+        if(checkResult()) {
+            addScore()
+            activeCell.value?.owner = currentPlayer.value
+        } else {
+            currentPlayer.value?.life = currentPlayer.value?.life!! - 1
+            showSnackbar.value = true
+        }
 
         //waktunyo reset
         isPlayerInputRightValue.value = true
-
-        currentPlayer.value?.life = currentPlayer.value?.life!! - 1
-//        addScore()
-        activeCell.value?.owner = currentPlayer.value
         activeCell.value = null
-
-
         changePlayer()
     }
 
@@ -154,7 +149,7 @@ class GameState (
         var angkaRandom  = mutableListOf<Int>()
 
         for (i in 1..jumlahCells * jumlahCells) {
-            angkaRandom.add(Random.nextInt(0, 100))
+            angkaRandom.add(Random.nextInt(11, 100))
         }
         return angkaRandom
     }
@@ -285,7 +280,8 @@ fun rememberHomeState(
     },
     activeCell: MutableState<TitunganCell?> = rememberSaveable { mutableStateOf(null) },
     isTimerRunning: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) },
-    isPlayerInputRightValue: MutableState<Boolean> = rememberSaveable {mutableStateOf(false)}
+    isPlayerInputRightValue: MutableState<Boolean> = rememberSaveable {mutableStateOf(false)},
+    showSnackbar: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
 //    isGameDrew: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 //    isRollingDices: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 //        firstPlayerPolicy: MutableState<FirstPlayerPolicy> = rememberSaveable {
@@ -307,7 +303,8 @@ fun rememberHomeState(
     numberInput2,
     selectedOperator,
     activeCell,
-    isTimerRunning
+    isTimerRunning,
+    showSnackbar
 ) {
     GameState(
         hapticFeedback,
@@ -326,8 +323,8 @@ fun rememberHomeState(
         selectedOperator,
         activeCell,
 
-        isTimerRunning,isPlayerInputRightValue
-
+        isTimerRunning,isPlayerInputRightValue,
+        showSnackbar
     )
 }
 
