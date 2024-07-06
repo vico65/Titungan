@@ -1,8 +1,6 @@
 package com.vico.titungan.ui.screen
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -31,8 +29,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,77 +45,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.vico.titungan.R
-import com.vico.titungan.domain.navigation.Screen
-import com.vico.titungan.ui.component.AppButton
-import com.vico.titungan.ui.component.HighlightedRoundedButton
-import com.vico.titungan.ui.component.RoundedButton
-import com.vico.titungan.ui.component.displayLarge
-import com.vico.titungan.ui.theme.TitunganTheme
-import com.vico.titungan.ui.theme.border2dp
-import com.vico.titungan.ui.theme.padding16dp
-import com.vico.titungan.ui.theme.width248dp
-import com.vico.titungan.ui.theme.padding64dp
+import com.vico.titungan.ui.component.button.RoundedButton
 import com.vico.titungan.ui.theme.yellow
 import kotlinx.coroutines.launch
 
-@Preview(showBackground = true)
-@Composable
-fun HelloJetpackComposeAppPreview() {
-    var navController: NavHostController = rememberNavController()
-
-    TitunganTheme() {
-        MenuScreen(navController)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HelloJetpackComposeAppPreview() {
+//    TitunganTheme() {
+//        MenuScreen(navController.navigate(Nav.Routes.settings))
+//    }
+//}
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MenuScreen(navController: NavHostController) {
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(padding16dp),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.Center
-//    ) {
-//        val context = LocalContext.current
-//        displayLarge(text = stringResource(id = R.string.app_name))
-//        AppButton(
-//            modifier = Modifier
-//                .width(width248dp)
-//                .padding(top = padding64dp),
-//            text = stringResource(R.string.new_game)
-//        ) {  } //context.launchActivity<GameActivity>()
-//        AppButton(
-//            modifier = Modifier.width(width248dp),
-//            text = stringResource(id = R.string.high_score)
-//        ) {
-//            navController.navigate(Screen.HighScores.route)
-//        }
-//        AppButton(modifier = Modifier.width(width248dp), text = stringResource(R.string.settings)) {
-//            navController.navigate(Screen.Settings.route)
-//        }
-//        AppButton(modifier = Modifier.width(width248dp), text = stringResource(R.string.about)) {
-//            navController.navigate(Screen.About.route)
-//        }
-//    }
+fun MenuScreen(
+    onNavigateToGame: () -> Unit = {},
+) {
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
-    val canResume = remember { mutableStateOf(false) }
-    val _difficultyItems: MutableState<List<GameCategoryItem>> = mutableStateOf(listOf(
+    val gameCategory: MutableState<List<GameCategoryItem>> = mutableStateOf(listOf(
         GameCategoryItem(
             title = "Quick Game",
             isGameInProgress = false,
@@ -154,7 +105,7 @@ fun MenuScreen(navController: NavHostController) {
             GameCategoryView(
                 modifier = Modifier.fillMaxSize(),
                 pagerState = pagerState,
-                gameCategoryItem = _difficultyItems.value,
+                gameCategoryItem = gameCategory.value,
             )
 
             PagerButtons(
@@ -183,14 +134,10 @@ fun MenuScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            canResume = canResume,
             onStartClicked = {
                 //                val item = difficulties.value[pagerState.currentPage].difficulty
                 //
-            },
-            onResumeClicked = {
-                //                val item = difficulties.value[pagerState.currentPage].difficulty
-                //                onResumeClicked(item)
+                             onNavigateToGame()
             },
             onSettingsClicked = {  },
         )
@@ -202,9 +149,7 @@ fun MenuScreen(navController: NavHostController) {
 @Composable
 fun GameButtons(
     modifier: Modifier = Modifier,
-    canResume: State<Boolean>,
     onStartClicked: () -> Unit,
-    onResumeClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
 ) {
 
@@ -220,29 +165,6 @@ fun GameButtons(
             text = "New game",
             onClick = onStartClicked,
         )
-
-        AnimatedVisibility(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            visible = canResume.value,
-        ) {
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                HighlightedRoundedButton(
-                    modifier = Modifier
-                        .wrapContentSize(),
-                    text = "Resume",
-                    onClick = onResumeClicked,
-                )
-            }
-        }
 
         Spacer(
             modifier = Modifier.weight(1f),
@@ -469,22 +391,3 @@ data class GameCategoryItem(
     val isGameInProgress: Boolean,
     val message: String
 )
-
-//sealed class GameDifficulty {
-//
-//    abstract val rows: Int
-//    abstract val columns: Int
-//    abstract val mines: Int
-//
-//    internal object QuickGame : GameDifficulty() {
-//        override val rows: Int = 10
-//        override val columns: Int = 10
-//        override val mines: Int = 10
-//    }
-//
-//    internal object Medium : GameDifficulty() {
-//        override val rows: Int = 16
-//        override val columns: Int = 16
-//        override val mines: Int = 35
-//    }
-//}

@@ -1,6 +1,7 @@
 package com.vico.titungan.ui.theme
 
 import android.app.Activity
+import androidx.compose.material3.ColorScheme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -14,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.wear.compose.material.MaterialTheme.colors
 
 private val DarkColorScheme = darkColorScheme(
     background = Grey,
@@ -47,26 +49,23 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun TitunganTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
+    isPreviewing: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
+        isDarkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-    val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (!isPreviewing) {
+        val activity = LocalView.current.context as Activity
         SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            activity.window.statusBarColor = colorScheme.surface.toArgb()
+            activity.window.navigationBarColor = colorScheme.surface.toArgb()
+            val wic =
+                WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+            wic.isAppearanceLightStatusBars = !isDarkTheme
+            wic.isAppearanceLightNavigationBars = !isDarkTheme
         }
     }
 

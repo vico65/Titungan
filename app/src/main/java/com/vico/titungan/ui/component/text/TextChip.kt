@@ -1,4 +1,4 @@
-package com.vico.titungan.ui.component
+package com.vico.titungan.ui.component.text
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

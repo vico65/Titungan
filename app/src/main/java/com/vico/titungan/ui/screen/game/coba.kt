@@ -1,14 +1,10 @@
 import android.annotation.SuppressLint
-import android.os.CountDownTimer
-import androidx.compose.animation.AnimatedContent
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
@@ -19,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,15 +25,24 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,165 +50,47 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Dp
 import com.vico.titungan.R
-import com.vico.titungan.ui.component.AnimatingText
+import com.vico.titungan.ui.component.RingShape
+import com.vico.titungan.ui.component.ShapePreview
+import com.vico.titungan.ui.component.XShape
+import com.vico.titungan.ui.component.button.ColoredButton
+import com.vico.titungan.ui.component.button.HighlightedRoundedButton
+import com.vico.titungan.ui.component.button.RoundedButton
+import com.vico.titungan.ui.screen.game.GameConstants
+import com.vico.titungan.ui.theme.Green
+import com.vico.titungan.ui.theme.Salmon
+import com.vico.titungan.ui.theme.TitunganTheme
 import com.vico.titungan.ui.theme.yellow
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+
+@Preview
+@Composable
+fun ClockPreview() {
+
+    TitunganTheme() {
+        Clock()
+    }
+}
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun Clock(
     modifier: Modifier = Modifier
 ) {
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    val canResume = remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
 
-    val _difficultyItems: MutableState<List<DifficultyItem>> = mutableStateOf(emptyList())
-    val difficultyItems: State<List<DifficultyItem>> = _difficultyItems
-    val difficulties = difficultyItems
-
-//    val paddingTop = with(LocalDensity.current) {
-//        val statusBar = LocalWindowInsets.current.statusBars.top.toDp()
-//        val cutOut = LocalWindowInsets.current.displayCutout.top.toDp()
-//        maxOf(statusBar, cutOut) + 32.dp
-//    }
-//
-    fun scrollRight() {
-        coroutineScope.launch {
-            val currentPage = pagerState.currentPage
-            if (currentPage < pagerState.pageCount - 1)
-                pagerState.animateScrollToPage(page = currentPage + 1)
-        }
-    }
-//
-    fun scrollLeft() {
-        coroutineScope.launch {
-            val currentPage = pagerState.currentPage
-            if (currentPage > 0)
-                pagerState.animateScrollToPage(page = currentPage - 1)
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
-            .padding(top = 20.dp),
-    ) {
-
-        GameTitle(
-            modifier = Modifier
-                .fillMaxHeight(fraction = 0.2f)
-                .fillMaxWidth()
-        )
-
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .fillMaxHeight(fraction = 0.5f)
-//        ) {
-//
-//            DifficultyView(
-//                modifier = Modifier.fillMaxSize(),
-//                pagerState = pagerState,
-//                difficultyItems = difficulties.value,
-//            )
-//
-//            PagerButtons(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(horizontal = 24.dp),
-//                pagerState = pagerState,
-//                onLeftClicked = ::scrollLeft,
-//                onRightClicked = ::scrollRight,
-//            )
-//        }
-//
-//        GameButtons(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .weight(1f),
-//            canResume = canResume,
-//            onStartClicked = {
-////                val item = difficulties.value[pagerState.currentPage].difficulty
-////
-//            },
-//            onResumeClicked = {
-////                val item = difficulties.value[pagerState.currentPage].difficulty
-////                onResumeClicked(item)
-//            },
-//            onSettingsClicked = {  },
-//        )
-    }
-}
-
-@Composable
-internal fun RoundedButton(
-    modifier: Modifier = Modifier,
-    text: String,
-    onClick: () -> Unit,
-) {
-
-    Text(
-        modifier = modifier
-            .clip(RoundedCornerShape(100f))
-            .border(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.onBackground,
-                shape = RoundedCornerShape(100f),
-            )
-            .clickable { onClick() }
-            .padding(
-                vertical = 12.dp,
-                horizontal = 40.dp,
-            ),
-        text = text,
-        style = MaterialTheme.typography.bodyLarge.copy(
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-    )
-}
-
-@Composable
-internal fun HighlightedRoundedButton(
-    modifier: Modifier = Modifier,
-    text: String,
-    onClick: () -> Unit,
-) {
-
-    Text(
-        modifier = modifier
-            .clip(RoundedCornerShape(100f))
-            .border(
-                width = 4.dp,
-                color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(100f),
-            )
-            .clickable { onClick() }
-            .padding(
-                vertical = 12.dp,
-                horizontal = 40.dp,
-            ),
-        text = text,
-        style = MaterialTheme.typography.bodyLarge.copy(
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-    )
 }
 
 @Composable
@@ -510,11 +396,7 @@ sealed class GameDifficulty {
 }
 
 
-@Preview
-@Composable
-fun clockPreview() {
-    Clock()
-}
+
 
 //@ExperimentalAnimationApi
 //private fun getContentTransformAnim(): ContentTransform {

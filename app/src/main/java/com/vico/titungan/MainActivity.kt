@@ -34,132 +34,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import com.vico.titungan.ui.theme.TitunganTheme
 import com.vico.titungan.ui.theme.purple500
 
 //import com.vico.titungan.ui.TitunganTheme
 
 
-class MainActivity : ComponentActivity() {
-    val mainViewModel by viewModels<MainViewModel>()
+internal class MainActivity : ComponentActivity() {
 
-
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            TitunganTheme {
-                Scaffold (topBar = {
-                    TitunganAppBar(mainViewModel.singlePlayer) {
-
-                    }
-                }){
-                    Surface (color = MaterialTheme.colorScheme.background) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.SpaceAround,
-                            modifier = Modifier.fillMaxHeight()
-                        ) {
-                            ButtonGrid(board = mainViewModel.board, onclick = mainViewModel::play )
-
-                            if (mainViewModel.isGameOver) {
-                                Box{
-                                    Text(
-                                        text = "Game is Over : ${mainViewModel.winner}",
-                                        fontSize = 20.sp
-                                    )
-                                }
-                            }
-
-                            ResetButton(mainViewModel::reset)
-
-                            TextButton(
-                                onClick = {
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        "Coming Soon",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                },
-                                modifier = Modifier.padding(16.dp).height(50.dp)
-                            ) {
-                                Text(
-                                    text = "Play With a Friend",
-                                    modifier = Modifier.padding(horizontal = 16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        setContent { MainNavigation() }
+        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 
-//    @SuppressLint("UnrememberedMutableState", "UnusedMaterial3ScaffoldPaddingParameter")
-//    @OptIn(ExperimentalMaterial3Api::class)
-//    @Preview(showBackground = true)
-//    @Composable
-//    fun GreetingPreview() {
-//        TitunganTheme {
-//            S
-//        }
-//    }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
-@Composable
-fun TicTacToeButton(text: String, onclick: () -> Unit) {
-    Box(modifier = Modifier.padding(8.dp)) {
-        TextButton(
-            shape = MaterialTheme.shapes.medium,
-            border = BorderStroke(1.dp, purple500),
-            onClick = onclick,
-            enabled = text.isBlank()
-        ) {
-            Text(
-                text = text,
-                style = TextStyle(
-                    textAlign = TextAlign.Center,
-                    fontSize = 35.sp
-                ),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .size(40.dp)
-                    .fillMaxHeight()
-            )
-        }
-    }
-}
-
-@Composable
-fun ButtonGrid(board: ArrayList<String>, onclick: (Int) -> Unit) {
-    Column(verticalArrangement = Arrangement.SpaceEvenly) {
-        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-            TicTacToeButton(text = board[0]) { onclick(0) }
-            TicTacToeButton(text = board[1]) { onclick(1) }
-            TicTacToeButton(text = board[2]) { onclick(2) }
-        }
-
-        Row(horizontalArrangement = Arrangement.SpaceAround) {
-            TicTacToeButton(text = board[3]) { onclick(3) }
-            TicTacToeButton(text = board[4]) { onclick(4) }
-            TicTacToeButton(text = board[5]) { onclick(5) }
-        }
-        Row(horizontalArrangement = Arrangement.SpaceAround) {
-            TicTacToeButton(text = board[6]) { onclick(6) }
-            TicTacToeButton(text = board[7]) { onclick(7) }
-            TicTacToeButton(text = board[8]) { onclick(8) }
-        }
-    }
-}
 
 
 

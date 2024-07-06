@@ -5,16 +5,12 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.os.CountDownTimer
-import android.util.Log
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,7 +20,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,24 +33,14 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowForward
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.twotone.Build
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -84,46 +69,48 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.wear.compose.material.MaterialTheme.colors
 import com.vico.titungan.R
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
-import com.vico.titungan.ui.component.AnimatingText
+import com.vico.titungan.ui.component.text.AnimatingText
 import com.vico.titungan.ui.component.RingShape
-import com.vico.titungan.ui.component.ScoreBoard
 import com.vico.titungan.ui.theme.BluePastel
-import com.vico.titungan.ui.theme.FredokaFontFamily
 import com.vico.titungan.ui.theme.TitunganTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun GameScreenPreview() {
-    var navController: NavHostController = rememberNavController()
+    val navController: NavHostController = rememberNavController()
 
-    TitunganTheme() {
-        GameScreen(navController)
-    }
+//    TitunganTheme() {
+//        GameScreen()
+//    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
-    navController: NavController,
-//    viewModel: GameViewModel
+    player1 : String,
+    player2 : String,
+    nyawa : Int,
+    waktu : Int,
+    tiles : Int,
+    caraMenang : Int,
+    defisitSkor : Int,
+    maksimumSkor : Int,
+    listOperators : Array<String>,
+    playOrder : Int,
 ) {
 
     LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -154,18 +141,17 @@ fun GameScreen(
                             .padding(vertical = 16.dp)
                             .verticalScroll(rememberScrollState()),
                         content = {
-                            var totalTime = 30
-                            var isRunning = true
-                            var timeLeft by remember { mutableIntStateOf(totalTime) }
+                            val isRunning = true
+                            var timeLeft by remember { mutableIntStateOf(waktu) }
 
                             LaunchedEffect(isRunning) {
                                 while (isRunning) {
-                                    for (second in totalTime downTo 0) {
+                                    for (second in waktu downTo 0) {
                                         timeLeft = second
 
                                         if(gameState.isPlayerInputRightValue.value) {
                                             gameState.isPlayerInputRightValue.value = false
-                                            timeLeft = totalTime
+                                            timeLeft = waktu
                                             break
                                         }
 
@@ -176,7 +162,7 @@ fun GameScreen(
                                     if (timeLeft == 0) {
                                         gameState.currentPlayer.value?.life = gameState.currentPlayer.value?.life!! - 1
                                         gameState.changePlayer()
-                                        timeLeft = totalTime
+                                        timeLeft = waktu
                                     }
                                 }
                             }
@@ -231,6 +217,7 @@ fun GameScreen(
                                         ) {
 
                                             OutlinedTextField(
+                                                enabled = (gameState.activeCell.value != null),
                                                 value = gameState.numberInput1.value,
                                                 onValueChange = { gameState.numberInput1.value = it },
                                                 placeholder = {
@@ -288,6 +275,7 @@ fun GameScreen(
                                             }
 
                                             OutlinedTextField(
+                                                enabled = (gameState.activeCell.value != null),
                                                 value = gameState.numberInput2.value,
                                                 onValueChange = { gameState.numberInput2.value = it },
                                                 placeholder = {
@@ -306,6 +294,7 @@ fun GameScreen(
                                                 colors = TextFieldDefaults.outlinedTextFieldColors(
                                                     focusedBorderColor = Color.Transparent,
                                                     unfocusedBorderColor = Color.Transparent,
+                                                    disabledBorderColor = Color.Transparent,
                                                     cursorColor = MaterialTheme.colorScheme.primary
                                                 ),
                                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -320,7 +309,7 @@ fun GameScreen(
                                                     if (gameState.showSnackbar.value) {
                                                         scope.launch {
                                                             snackbarHostState.showSnackbar(
-                                                                message = "Ini adalah Snackbar!"
+                                                                message = "Hasil anda salah"
                                                             )
                                                             gameState.showSnackbar.value = false
                                                         }
@@ -328,13 +317,14 @@ fun GameScreen(
                                                           },
                                                 border = BorderStroke(
                                                     width = 3.dp,
-                                                    color = MaterialTheme.colorScheme.onBackground,
+                                                    color = if (gameState.numberInput1.value.isNotEmpty() && gameState.numberInput2.value.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.background,
                                                 ),
                                                 modifier = Modifier
                                                     .padding(start = 16.dp)
                                                     .weight(2f),
                                                 colors = ButtonDefaults.buttonColors(
                                                     containerColor = MaterialTheme.colorScheme.primary,
+                                                    disabledContainerColor = Color.DarkGray.copy(alpha = 0.7f),
                                                 ),
                                                 shape = CircleShape
                                             ) {
@@ -446,7 +436,7 @@ private fun TitunganItem(
             .background(backgroundColor)
             .border(
                 width = if(hasOwner) 2.dp else 4.dp,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = if (hasOwner) 0.5f else 1f),
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

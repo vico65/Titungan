@@ -1,4 +1,4 @@
-package com.vico.titungan.ui.component
+package com.vico.titungan.ui.component.button
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

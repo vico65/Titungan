@@ -103,6 +103,12 @@ class GameState (
 
         //waktunyo reset
         isPlayerInputRightValue.value = true
+
+        //hapus inputan
+        numberInput1.value = ""
+        numberInput2.value = ""
+        selectedOperator.value = "+"
+
         activeCell.value = null
         changePlayer()
     }
@@ -126,8 +132,9 @@ class GameState (
     }
 
     fun checkResult(
-        result: Int? = gameCells.value.flatten().find { it.isActive }?.number
+        result: Int? = activeCell.value?.number
     ) : Boolean {
+        Log.i("Result", "$result")
         return countResult() == result
     }
 
