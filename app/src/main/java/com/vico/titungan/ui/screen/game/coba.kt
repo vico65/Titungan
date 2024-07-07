@@ -79,18 +79,18 @@ import com.vico.titungan.ui.theme.yellow
 @Composable
 fun ClockPreview() {
 
-    TitunganTheme() {
-        Clock()
-    }
+//    TitunganTheme() {
+//        Coba("Vico")
+//    }
 }
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun Clock(
-    modifier: Modifier = Modifier
+fun Coba(
+    nama : Array<String>
 ) {
-
+    Log.i("nama", nama.toString())
 }
 
 @Composable

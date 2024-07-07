@@ -15,28 +15,29 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
 
-        var random = randomNumber(3)
+        var random = Random.nextInt(1, 3)
+        print(Random.nextInt(1, 3))
         print(random)
     }
 }
 
-fun randomNumber(jumlahCells : Int = 0) {
-    val cells = listOf(
-        listOf(
-            TitunganCell(0, 0, 1, isActive =false),
-            TitunganCell(0, 1, 2, isActive = true)
-        ),
-        listOf(
-            TitunganCell(1, 0, 3, isActive =false),
-            TitunganCell(1, 1, 4, isActive =false)
-        )
-    )
-
-    // Menggunakan `flatMap` dan `find` untuk mendapatkan sel pertama yang aktif
-    println("Sebelum diubah: ${cells[0][1].isActive}")
-    cells.flatMap { it }.find { it.isActive }?.isActive = false
-    println("Sebelum diubah: ${cells[0][1].isActive}")
-}
+//fun randomNumber(jumlahCells : Int = 0) {
+//    val cells = listOf(
+//        listOf(
+//            TitunganCell(0, 0, 1, isActive =false),
+//            TitunganCell(0, 1, 2, isActive = true)
+//        ),
+//        listOf(
+//            TitunganCell(1, 0, 3, isActive =false),
+//            TitunganCell(1, 1, 4, isActive =false)
+//        )
+//    )
+//
+//    // Menggunakan `flatMap` dan `find` untuk mendapatkan sel pertama yang aktif
+//    println("Sebelum diubah: ${cells[0][1].isActive}")
+//    cells.flatMap { it }.find { it.isActive }?.isActive = false
+//    println("Sebelum diubah: ${cells[0][1].isActive}")
+//}
 
 fun checkList() {
      val columns = mutableListOf<List<TitunganCell>>()

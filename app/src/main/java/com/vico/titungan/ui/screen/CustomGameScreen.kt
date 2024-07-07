@@ -1,5 +1,6 @@
 package com.vico.titungan.ui.screen
 
+import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,10 +40,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.vico.titungan.R
 import com.vico.titungan.ui.component.RingShape
 import com.vico.titungan.ui.component.ShapePreview
@@ -50,10 +56,21 @@ import com.vico.titungan.ui.component.button.ColoredButton
 import com.vico.titungan.ui.screen.game.GameConstants
 import com.vico.titungan.ui.theme.Green
 import com.vico.titungan.ui.theme.Salmon
+import com.vico.titungan.ui.theme.TitunganTheme
 
+@Preview
+@Composable
+fun ClockkPreview() {
+
+    TitunganTheme() {
+        CustomGameScreen()
+    }
+}
+
+@OptIn(UnstableApi::class)
 @Composable
 fun CustomGameScreen(
-    navController : NavController,
+    navController : NavController = rememberNavController(),
 ) {
     var player1 by remember { mutableStateOf(TextFieldValue("")) }
     var player2 by remember { mutableStateOf(TextFieldValue("")) }
@@ -72,7 +89,8 @@ fun CustomGameScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
+            .systemBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -195,7 +213,14 @@ fun CustomGameScreen(
                 .padding(start = 16.dp)
                 .wrapContentSize(),
             text = "Mulai",
-            onClick = { },
+            onClick = {
+                var listOperators = arrayOf("+", "-")
+//                navController.navigate("game/${player1.text}/${player2.text}/$nyawa/$waktu/${tiles + 2}/$caraMenang/${defisitSkor.text}/${maksimumSkor.text}/$listOperators/$playOrder")
+
+                //dk boleh kosong salah satunya
+                navController.navigate("game/Vico/Ridho/5/15/4/1/0/0/1")
+//                Log.i("Button dipecet", "game/${player1.text}/${player2.text}/$nyawa/$waktu/${tiles + 2}/$caraMenang/${defisitSkor.text}/${maksimumSkor.text}/$playOrder")
+            },
             enabled = true,
             borderColor = MaterialTheme.colorScheme.onBackground,
         )

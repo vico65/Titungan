@@ -1,5 +1,6 @@
 package com.vico.titungan
 
+import Coba
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -43,8 +44,15 @@ internal fun MainNavigation() {
                     startDestination = Nav.Routes.mainMenu,
                     builder = {
                         composable(Nav.Routes.mainMenu) {
-                            MenuScreen(onNavigateToGame = {navController.navigate(Nav.Routes.game)})
+                            MenuScreen(navController)
                         }
+//                        composable("coba/{nama}", arguments = listOf(
+//                            navArgument("nama") {type = NavType.StringType}
+//                        )) {
+//                            var nama = it.arguments?.getString("nama") ?: "add,sub"
+//                            var namafix = nama.split(",").toTypedArray()
+//                            Coba(namafix)
+//                        }
                         composable(
                             Nav.Routes.game,
                             arguments = listOf(
@@ -56,7 +64,7 @@ internal fun MainNavigation() {
                                 navArgument("caraMenang") {type = NavType.IntType},
                                 navArgument("defisitSkor") {type = NavType.IntType},
                                 navArgument("maksimumSkor") {type = NavType.IntType},
-                                navArgument("listOperators") {type = NavType.StringArrayType},
+                                navArgument("listOperators") {type = NavType.StringType},
                                 navArgument("playOrder") {type = NavType.IntType},
                             )
                         ) {
@@ -68,7 +76,8 @@ internal fun MainNavigation() {
                             val caraMenang = it.arguments?.getInt("caraMenang")?: 1
                             val defisitSkor = it.arguments?.getInt("defisitSkor")?: 0
                             val maksimumSkor = it.arguments?.getInt("maksimumSkor")?: 0
-                            val listOperators = it.arguments?.getStringArray("listOperators")?: GameConstants.listOperators.toTypedArray()
+                            val listOperators = it.arguments?.getString("listOperators")?: "+,-"
+                            val listOperatorsArray = listOperators.split(",").toTypedArray()
                             val playOrder = it.arguments?.getInt("playOrder")?: 1
                             GameScreen(
                                 player1 = player1.toString(),
@@ -79,7 +88,7 @@ internal fun MainNavigation() {
                                 caraMenang = caraMenang,
                                 defisitSkor = defisitSkor,
                                 maksimumSkor = maksimumSkor,
-                                listOperators = listOperators,
+                                listOperators = listOperatorsArray,
                                 playOrder = playOrder
                             )
                         }

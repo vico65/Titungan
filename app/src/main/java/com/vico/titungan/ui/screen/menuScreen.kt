@@ -50,8 +50,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.vico.titungan.R
 import com.vico.titungan.ui.component.button.RoundedButton
+import com.vico.titungan.ui.navigation.Nav
 import com.vico.titungan.ui.theme.yellow
 import kotlinx.coroutines.launch
 
@@ -67,7 +69,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MenuScreen(
-    onNavigateToGame: () -> Unit = {},
+   navController: NavController,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
@@ -137,7 +139,9 @@ fun MenuScreen(
             onStartClicked = {
                 //                val item = difficulties.value[pagerState.currentPage].difficulty
                 //
-                             onNavigateToGame()
+                val array = arrayOf("add", "sub", "mul", "div")
+                val result = array.joinToString(separator = ",")
+                navController.navigate("game/Vico/Ridho/5/15/4/1/0/0/+,-/1")
             },
             onSettingsClicked = {  },
         )

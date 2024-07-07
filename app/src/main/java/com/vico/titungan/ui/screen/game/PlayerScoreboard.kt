@@ -38,15 +38,6 @@ import com.vico.titungan.ui.theme.DarkRed
 import com.vico.titungan.ui.theme.Green
 import com.vico.titungan.ui.theme.Salmon
 
-@Preview
-@Composable
-fun CountdownTimerPreview() {
-    var player1 = Player("Player 1", "xShape")
-    var player2 = Player("Player 2", "ringShape")
-    var Players = listOf(player1, player2)
-    ScoreBoard(players = Players, currentPlayer = player1)
-}
-
 @Composable
 internal fun ScoreBoard(
     players: List<Player>,

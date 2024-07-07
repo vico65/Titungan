@@ -43,6 +43,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -110,14 +111,25 @@ fun GameScreen(
     defisitSkor : Int,
     maksimumSkor : Int,
     listOperators : Array<String>,
-    playOrder : Int,
+    playOrder : Int
 ) {
 
     LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
     val gameState = rememberHomeState()
 
-    gameState.newGame()
+    //tiles + 2
+    gameState.newGame(
+        player1,
+        player2,
+        nyawa,
+        tiles,
+        caraMenang,
+        defisitSkor,
+        maksimumSkor,
+        listOperators,
+        playOrder
+    )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -143,6 +155,7 @@ fun GameScreen(
                         content = {
                             val isRunning = true
                             var timeLeft by remember { mutableIntStateOf(waktu) }
+                            var dropDownMenuExpanded by remember { mutableStateOf(false) }
 
                             LaunchedEffect(isRunning) {
                                 while (isRunning) {
@@ -179,8 +192,6 @@ fun GameScreen(
                                 }
                             )
 
-
-
                             AnimatedVisibility(
                                 visible = gameState.isGameStarted.value,
                                 enter = scaleIn(),
@@ -196,150 +207,44 @@ fun GameScreen(
                                     )
                                 }
                             )
-//                            Spacer(modifier = Modifier.height(64.dp))
+
                             AnimatedVisibility(
                                 visible = gameState.isGameStarted.value,
                                 enter = scaleIn(),
                                 exit = scaleOut(),
                                 content = {
-                                    var expanded by remember { mutableStateOf(false) }
-                                    val operators = listOf("+", "-", "x", "/")
 
-                                    Column (
-                                        modifier = Modifier
-                                            .padding(8.dp)
-                                            .fillMaxWidth(),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
+                                    FormInputNumber(
+                                        dropDownMenuExpanded = dropDownMenuExpanded,
+                                        numberInputEnabled = gameState.activeCell.value != null,
+                                        numberInput1 = gameState.numberInput1.value,
+                                        numberInput1OnValueChange = { gameState.numberInput1.value = it },
+                                        numberInput2 = gameState.numberInput2.value,
+                                        numberInput2OnValueChange = { gameState.numberInput2.value = it },
+                                        selectedOperator = gameState.selectedOperator.value,
+                                        dropDownMenuOnClick = { dropDownMenuExpanded = true },
+                                        dropDownMenuOnDismissRequest = { dropDownMenuExpanded = false },
+                                        dropDownMenuItemOnClick = {
+                                            gameState.selectedOperator.value = it
+                                            dropDownMenuExpanded = false
+                                        },
+                                        buttonEnabled = gameState.numberInput1.value.isNotEmpty() && gameState.numberInput2.value.isNotEmpty(),
+                                        buttonOnClick = {
+                                            gameState.checkWinStatus()
+                                            gameState.isPlayerInputRightValue.value = true
 
-                                            OutlinedTextField(
-                                                enabled = (gameState.activeCell.value != null),
-                                                value = gameState.numberInput1.value,
-                                                onValueChange = { gameState.numberInput1.value = it },
-                                                placeholder = {
-                                                    Text(stringResource(id = R.string.input_number_1_name),
-                                                        color = Color.Gray)
-                                                },
-                                                modifier = Modifier
-                                                    .weight(2f)
-                                                    .height(50.dp)
-                                                    .border(
-                                                        width = 3.dp,
-                                                        color = MaterialTheme.colorScheme.onBackground,
-                                                        shape = RoundedCornerShape(100),
-                                                    ),
-                                                textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
-                                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                                    focusedBorderColor = Color.Transparent,
-                                                    unfocusedBorderColor = Color.Transparent,
-                                                    cursorColor = Color(0xFF01579B)
-                                                ),
-                                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                            )
-
-                                            Box(
-                                                modifier = Modifier
-                                                    .weight(0.5f)
-                                                    .clickable { expanded = true },
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(
-                                                    gameState.selectedOperator.value,
-                                                    modifier = Modifier.padding(4.dp),
-                                                    style = TextStyle(
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        fontSize = 26.sp
+                                            if (gameState.showSnackbar.value) {
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(
+                                                        message = "Hasil anda salah"
                                                     )
-                                                )
-                                                DropdownMenu(
-                                                    expanded = expanded,
-                                                    onDismissRequest = { expanded = false }
-                                                ) {
-                                                    operators.forEach { operator ->
-                                                        DropdownMenuItem(onClick = {
-                                                            gameState.selectedOperator.value = operator
-                                                            expanded = false
-                                                        }, text = { Text(
-                                                            operator,
-                                                            style = TextStyle(
-                                                                color = MaterialTheme.colorScheme.primary,
-                                                                fontSize = 16.sp
-                                                            )
-                                                        )})
-                                                    }
+                                                    gameState.showSnackbar.value = false
                                                 }
                                             }
-
-                                            OutlinedTextField(
-                                                enabled = (gameState.activeCell.value != null),
-                                                value = gameState.numberInput2.value,
-                                                onValueChange = { gameState.numberInput2.value = it },
-                                                placeholder = {
-                                                    Text(stringResource(id = R.string.input_number_2_name),
-                                                        color = Color.Gray)
-                                                },
-                                                modifier = Modifier
-                                                    .weight(2f)
-                                                    .height(50.dp)
-                                                    .border(
-                                                        width = 3.dp,
-                                                        color = MaterialTheme.colorScheme.onBackground,
-                                                        shape = RoundedCornerShape(100),
-                                                    ),
-                                                textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
-                                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                                    focusedBorderColor = Color.Transparent,
-                                                    unfocusedBorderColor = Color.Transparent,
-                                                    disabledBorderColor = Color.Transparent,
-                                                    cursorColor = MaterialTheme.colorScheme.primary
-                                                ),
-                                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                            )
-
-                                            Button(
-                                                enabled = (gameState.numberInput1.value.isNotEmpty() && gameState.numberInput2.value.isNotEmpty()),
-                                                onClick = {
-                                                    gameState.checkWinStatus()
-                                                    gameState.isPlayerInputRightValue.value = true
-
-                                                    if (gameState.showSnackbar.value) {
-                                                        scope.launch {
-                                                            snackbarHostState.showSnackbar(
-                                                                message = "Hasil anda salah"
-                                                            )
-                                                            gameState.showSnackbar.value = false
-                                                        }
-                                                    }
-                                                          },
-                                                border = BorderStroke(
-                                                    width = 3.dp,
-                                                    color = if (gameState.numberInput1.value.isNotEmpty() && gameState.numberInput2.value.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.background,
-                                                ),
-                                                modifier = Modifier
-                                                    .padding(start = 16.dp)
-                                                    .weight(2f),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = MaterialTheme.colorScheme.primary,
-                                                    disabledContainerColor = Color.DarkGray.copy(alpha = 0.7f),
-                                                ),
-                                                shape = CircleShape
-                                            ) {
-                                                Text(
-                                                    text = "Cek",
-                                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                                        fontSize = 20.sp,
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = MaterialTheme.colorScheme.background,
-                                                    )
-                                                )
-                                            }
-                                        }
-                                    }
-
+                                        },
+                                        buttonBorderColor = if (gameState.numberInput1.value.isNotEmpty() && gameState.numberInput2.value.isNotEmpty()) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.background,
+                                        listOperators = listOperators
+                                    )
 
                                 }
                             )
@@ -353,16 +258,145 @@ fun GameScreen(
 
 }
 
-//@Composable
-//private fun formInputNumber(
-//    gameCells: List<List<TitunganCell>>,
-//    isGameFinished: Boolean,
-//    numberInput1: Int,
-//    numberInput2: Int,
-//    onItemClick: (TitunganCell) -> Unit
-//) {
-//
-//}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FormInputNumber(
+    dropDownMenuExpanded : Boolean,
+    numberInputEnabled : Boolean,
+    numberInput1 : String,
+    numberInput1OnValueChange : (String) -> Unit,
+    numberInput2 : String,
+    numberInput2OnValueChange : (String) -> Unit,
+    selectedOperator : String,
+    dropDownMenuOnClick : () -> Unit,
+    dropDownMenuOnDismissRequest : () -> Unit,
+    dropDownMenuItemOnClick : (String) -> Unit,
+    buttonEnabled : Boolean,
+    buttonOnClick : () -> Unit,
+    buttonBorderColor : Color,
+    listOperators: Array<String>
+) {
+
+    Column (
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+
+            OutlinedTextField(
+                enabled = numberInputEnabled,
+                value = numberInput1,
+                onValueChange = { numberInput1OnValueChange(it) },
+                placeholder = {
+                    Text(stringResource(id = R.string.input_number_1_name),
+                        color = Color.Gray)
+                },
+                modifier = Modifier
+                    .weight(2f)
+                    .height(50.dp)
+                    .border(
+                        width = 3.dp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        shape = RoundedCornerShape(100),
+                    ),
+                textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = MaterialTheme.colorScheme.primary
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .clickable { dropDownMenuOnClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    selectedOperator,
+                    modifier = Modifier.padding(4.dp),
+                    style = TextStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 26.sp
+                    )
+                )
+                DropdownMenu(
+                    expanded = dropDownMenuExpanded,
+                    onDismissRequest = dropDownMenuOnDismissRequest
+                ) {
+                    listOperators.forEach { operator ->
+                        DropdownMenuItem(onClick = { dropDownMenuItemOnClick(operator) }, text = { Text(
+                            operator,
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 16.sp
+                            )
+                        )})
+                    }
+                }
+            }
+
+            OutlinedTextField(
+                enabled = numberInputEnabled,
+                value = numberInput2,
+                onValueChange = numberInput2OnValueChange,
+                placeholder = {
+                    Text(stringResource(id = R.string.input_number_2_name),
+                        color = Color.Gray)
+                },
+                modifier = Modifier
+                    .weight(2f)
+                    .height(50.dp)
+                    .border(
+                        width = 3.dp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        shape = RoundedCornerShape(100),
+                    ),
+                textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
+                    cursorColor = MaterialTheme.colorScheme.primary
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            )
+
+            Button(
+                enabled = buttonEnabled,
+                onClick = buttonOnClick,
+                border = BorderStroke(
+                    width = 3.dp,
+                    color = buttonBorderColor,
+                ),
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .weight(2f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = Color.DarkGray.copy(alpha = 0.7f),
+                ),
+                shape = CircleShape
+            ) {
+                Text(
+                    text = "Cek",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.background,
+                    )
+                )
+            }
+        }
+    }
+}
 
 
 @Composable
@@ -435,7 +469,7 @@ private fun TitunganItem(
             .clip(RoundedCornerShape(6.dp))
             .background(backgroundColor)
             .border(
-                width = if(hasOwner) 2.dp else 4.dp,
+                width = if (hasOwner) 2.dp else 4.dp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = if (hasOwner) 0.5f else 1f),
             )
             .clickable(

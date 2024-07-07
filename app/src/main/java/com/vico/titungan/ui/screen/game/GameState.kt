@@ -65,30 +65,72 @@ class GameState (
     init {
         isSoundOn = true
         isVibrationOn = true
-        prepareGame()
+//        prepareGame()
     }
 
-    fun newGame() {
-//        scope.launch {
-//            if (firstPlayerPolicy.value == FirstPlayerPolicy.DiceRolling)
-//                dummyDiceRolling()
-//        }
-
-        prepareGame()
+    fun newGame(
+        player1 : String,
+        player2 : String,
+        nyawa : Int,
+        tiles : Int,
+        caraMenang : Int,
+        defisitSkor : Int,
+        maksimumSkor : Int,
+        listOperators : Array<String>,
+        playOrder : Int
+    )  {
+        resetGame()
+        prepareGameRules(tiles)
+        preparePlayers(player1, player2, nyawa, playOrder)
+//        prepareGameLogic()
+//        prepareGame()
         isGameStarted.value = true
     }
-    private fun prepareGame() {
-        resetGame()
-        prepareGameRules()
-        preparePlayers()
-        prepareGameLogic()
+    private fun prepareGameRules(size : Int) {
+        //harusny pake data store
+        gameSize.intValue = size
     }
+
+    private fun preparePlayers(player1 : String, player2 : String, nyawa: Int, playOrder: Int) {
+        val firstPlayerName = player1
+        val secondPlayerName =  player2
+
+        val firstPlayerShape = XShape
+        val secondPlayerShape = RingShape
+
+        players.value = createPlayers(
+            firstPlayerName,
+            firstPlayerShape,
+            secondPlayerShape,
+            secondPlayerName,
+            nyawa
+        )
+
+        currentPlayer.value = if(playOrder == 1) players.value.first() else players.value.last()
+    }
+
+    private fun createPlayers(
+        firstPlayerName: String,
+        firstPlayerShape: Shape,
+        secondPlayerShape: Shape,
+        secondPlayerName: String,
+        nyawa: Int
+    ) = buildList {
+        add(Player(name = firstPlayerName,shape = firstPlayerShape.toName(),life = nyawa))
+        add(Player(name = secondPlayerName,shape = secondPlayerShape.toName(), life = nyawa))
+    }
+
+//    private fun prepareGame() {
+//        resetGame()
+//        prepareGameRules()
+//        preparePlayers()
+//        prepareGameLogic()
+//    }
 
     private fun resetGame() {
         winner.value = null
         isGameFinished.value = false
         isGameStarted.value = false
-//        isGameDrew.value = false
         gameCells.value = getEmptyBoard()
     }
 
@@ -138,22 +180,12 @@ class GameState (
         return countResult() == result
     }
 
-
-
-
-
-
-    private fun prepareGameRules() {
-        //harusny pake data store
-        gameSize.intValue = gameDefaultSize
-    }
-
-    private fun prepareGameLogic() {
-        gameLogic = SimpleGameLogic(gameCells.value, gameSize.intValue)
-    }
+//    private fun prepareGameLogic() {
+//        gameLogic = SimpleGameLogic(gameCells.value, gameSize.intValue)
+//    }
 
     fun getRandomNumber(jumlahCells : Int = 0) : MutableList<Int>{
-        var angkaRandom  = mutableListOf<Int>()
+        val angkaRandom  = mutableListOf<Int>()
 
         for (i in 1..jumlahCells * jumlahCells) {
             angkaRandom.add(Random.nextInt(11, 100))
@@ -175,38 +207,6 @@ class GameState (
             columns.add(row)
         }
         return columns
-    }
-
-    private fun preparePlayers() {
-        val firstPlayerName = context.getString(R.string.first_player_default_name)
-        val secondPlayerName =  context.getString(R.string.second_player_default_name)
-
-        val firstPlayerShape = XShape
-        val secondPlayerShape = RingShape
-
-//        val firstPlayerDice = Random.nextInt(Constants.diceRange)
-//        val secondPlayerDice = Random.nextInt(Constants.diceRange)
-
-        players.value = createPlayers(
-            firstPlayerName,
-            firstPlayerShape,
-            secondPlayerShape,
-            secondPlayerName
-        )
-
-        currentPlayer.value = players.value.first()
-    }
-
-    //fungsi setFirstPlayerToDiceWinner
-
-    private fun createPlayers(
-        firstPlayerName: String,
-        firstPlayerShape: Shape,
-        secondPlayerShape: Shape,
-        secondPlayerName: String
-    ) = buildList {
-        add(Player(firstPlayerName, firstPlayerShape.toName()))
-        add(Player(secondPlayerName,secondPlayerShape.toName()))
     }
 
     //fungsi dummy dice rolling
