@@ -27,6 +27,7 @@ import com.vico.titungan.ui.component.toName
 import com.vico.titungan.ui.component.toShape
 import com.vico.titungan.ui.screen.game.GameConstants.gameDefaultSize
 import io.github.yamin8000.dooz.game.logic.GameLogic
+import kotlin.math.abs
 import kotlin.random.Random
 
 class GameState (
@@ -66,6 +67,8 @@ class GameState (
         isSoundOn = true
         isVibrationOn = true
 //        prepareGame()
+
+//        newGame("Vico", "Ridho", 5, 3, 1, 0, 0,  arrayOf("+", "-"), 1)
     }
 
     fun newGame(
@@ -73,14 +76,13 @@ class GameState (
         player2 : String,
         nyawa : Int,
         tiles : Int,
-        caraMenang : Int,
-        defisitSkor : Int,
-        maksimumSkor : Int,
         listOperators : Array<String>,
         playOrder : Int
     )  {
-        resetGame()
+
         prepareGameRules(tiles)
+
+        resetGame()
         preparePlayers(player1, player2, nyawa, playOrder)
 //        prepareGameLogic()
 //        prepareGame()
@@ -89,6 +91,13 @@ class GameState (
     private fun prepareGameRules(size : Int) {
         //harusny pake data store
         gameSize.intValue = size
+    }
+
+    private fun resetGame() {
+        winner.value = null
+        isGameFinished.value = false
+        isGameStarted.value = false
+        gameCells.value = getEmptyBoard()
     }
 
     private fun preparePlayers(player1 : String, player2 : String, nyawa: Int, playOrder: Int) {
@@ -106,7 +115,7 @@ class GameState (
             nyawa
         )
 
-        currentPlayer.value = if(playOrder == 1) players.value.first() else players.value.last()
+        currentPlayer.value = if(playOrder == 1) players.value.first() else if(playOrder == 2) players.value.last() else players.value[Random.nextInt(0, 2)]
     }
 
     private fun createPlayers(
@@ -127,16 +136,37 @@ class GameState (
 //        prepareGameLogic()
 //    }
 
-    private fun resetGame() {
-        winner.value = null
-        isGameFinished.value = false
-        isGameStarted.value = false
-        gameCells.value = getEmptyBoard()
+
+    fun checkIsAllOwnersNotNull() : Boolean {
+        return gameCells.value.flatten().all { it.owner != null }
     }
 
-    fun checkWinStatus() {
+    fun getHigherScorePlayer(): Player {
+        return if (players.value.first().score >= players.value.last().score) players.value.first() else players.value.last()
+    }
+
+    fun checkIfAllTilesIsFull() : Boolean{
+        return players.value.first().score + players.value.last().score == gameSize.intValue * gameSize.intValue
+    }
+
+    fun checkIsRightAnswer(
+        caraMenang : Int,
+        defisitSkor : Int,
+        maksimumSkor : Int,
+    ) {
         if(checkResult()) {
             addScore()
+            if(caraMenang == 1 || caraMenang == 2) {
+                //cek dulu apakah semua tiles sudah penuh
+                if(checkIfAllTilesIsFull()) winner.value = getHigherScorePlayer()
+
+                //cek apakah defisit skornyo
+                else if (caraMenang == 2 && abs(players.value.first().score - players.value.last().score) == defisitSkor) winner.value = getHigherScorePlayer()
+
+            } else {
+                if(players.value.first().score + players.value.last().score == maksimumSkor) winner.value = getHigherScorePlayer()
+            }
+
             activeCell.value?.owner = currentPlayer.value
         } else {
             currentPlayer.value?.life = currentPlayer.value?.life!! - 1
@@ -153,6 +183,10 @@ class GameState (
 
         activeCell.value = null
         changePlayer()
+    }
+
+    fun checkWin() {
+
     }
 
     fun changeActiveCell(cell: TitunganCell) {activeCell.value = cell}
@@ -194,6 +228,8 @@ class GameState (
     }
 
     private fun getEmptyBoard(): List<List<TitunganCell>> {
+        Log.i("Marghafsssf", "iyaa")
+
         val columns = mutableListOf<List<TitunganCell>>()
         val angkaRandom = getRandomNumber(gameSize.intValue)
         var iterator = 0

@@ -218,7 +218,7 @@ fun CustomGameScreen(
 //                navController.navigate("game/${player1.text}/${player2.text}/$nyawa/$waktu/${tiles + 2}/$caraMenang/${defisitSkor.text}/${maksimumSkor.text}/$listOperators/$playOrder")
 
                 //dk boleh kosong salah satunya
-                navController.navigate("game/Vico/Ridho/5/15/4/1/0/0/1")
+                navController.navigate("game/Vico/Ridho/5/15/3/1/0/0/+,-/1")
 //                Log.i("Button dipecet", "game/${player1.text}/${player2.text}/$nyawa/$waktu/${tiles + 2}/$caraMenang/${defisitSkor.text}/${maksimumSkor.text}/$playOrder")
             },
             enabled = true,

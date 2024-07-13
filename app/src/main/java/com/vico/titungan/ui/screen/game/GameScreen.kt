@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -94,9 +95,9 @@ import kotlinx.coroutines.launch
 fun GameScreenPreview() {
     val navController: NavHostController = rememberNavController()
 
-//    TitunganTheme() {
-//        GameScreen()
-//    }
+    TitunganTheme() {
+        GameScreen("Vico", "Ridho", 5, 15, 3, 1, 0, 0, arrayOf("+", "-"), 1)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,18 +119,16 @@ fun GameScreen(
 
     val gameState = rememberHomeState()
 
-    //tiles + 2
-    gameState.newGame(
-        player1,
-        player2,
-        nyawa,
-        tiles,
-        caraMenang,
-        defisitSkor,
-        maksimumSkor,
-        listOperators,
-        playOrder
-    )
+    LaunchedEffect(Unit) {
+        gameState.newGame(
+            player1,
+            player2,
+            nyawa,
+            tiles,
+            listOperators,
+            playOrder
+        )
+    }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -230,7 +229,7 @@ fun GameScreen(
                                         },
                                         buttonEnabled = gameState.numberInput1.value.isNotEmpty() && gameState.numberInput2.value.isNotEmpty(),
                                         buttonOnClick = {
-                                            gameState.checkWinStatus()
+                                            gameState.checkIsRightAnswer(caraMenang,defisitSkor, maksimumSkor)
                                             gameState.isPlayerInputRightValue.value = true
 
                                             if (gameState.showSnackbar.value) {
@@ -308,6 +307,7 @@ private fun FormInputNumber(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
                     cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -408,6 +408,7 @@ private fun GameBoard(
     shapeProvider: (Player?) -> Shape,
     onItemClick: (TitunganCell) -> Unit
 ) {
+
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val boxPadding = 16.dp
     val boxSize = screenWidth - (2 * boxPadding.value).dp
@@ -506,7 +507,7 @@ private fun TitunganItem(
                                 .size((size.value / 2).dp)
                                 .clip(shape)
                                 .background(
-                                    if (shape == RingShape) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error
+                                    if (shape == RingShape) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                                 ),
                         )
                     }

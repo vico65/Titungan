@@ -15,8 +15,12 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
 
-        var random = Random.nextInt(1, 3)
-        print(Random.nextInt(1, 3))
+        var random = Random.nextInt(0, 2)
+        print(Random.nextInt(0, 2))
+        print(Random.nextInt(0, 2))
+        print(Random.nextInt(0, 2))
+        print(Random.nextInt(0, 2))
+
         print(random)
     }
 }

@@ -141,7 +141,7 @@ fun MenuScreen(
                 //
                 val array = arrayOf("add", "sub", "mul", "div")
                 val result = array.joinToString(separator = ",")
-                navController.navigate("game/Vico/Ridho/5/15/4/1/0/0/+,-/1")
+                navController.navigate("game/Vico/Ridho/5/15/3/1/0/0/+,-/3")
             },
             onSettingsClicked = {  },
         )

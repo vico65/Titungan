@@ -1,6 +1,7 @@
 package com.vico.titungan.ui.screen.game
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,14 +38,29 @@ import com.vico.titungan.ui.component.toShape
 import com.vico.titungan.ui.theme.DarkRed
 import com.vico.titungan.ui.theme.Green
 import com.vico.titungan.ui.theme.Salmon
+import com.vico.titungan.ui.theme.TitunganTheme
 
+@Preview
+@Composable
+fun ClockPreview() {
+
+    TitunganTheme() {
+        val players = listOf(Player(name = "Vico", score = 0, life = 3), Player(name = "Ridho", score = 0, life = 2))
+        ScoreBoard(players = players, currentPlayer = players[1])
+    }
+}
 @Composable
 internal fun ScoreBoard(
     players: List<Player>,
     currentPlayer: Player?
 ) {
-    val firstPlayer = players[0]
-    val secondPlayer = players[1]
+    var firstPlayer: Player? = null
+    var secondPlayer: Player? = null
+
+    if (players.isNotEmpty()) {
+        firstPlayer = players[0]
+        secondPlayer = players[1]
+    }
 
     Column(
         modifier = Modifier
@@ -59,20 +75,25 @@ internal fun ScoreBoard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            PlayerScore(
-                player = firstPlayer,
-                isCurrentPlayer = firstPlayer == currentPlayer
-            )
+            if (firstPlayer != null) {
+                PlayerScore(
+                    player = firstPlayer,
+                    isCurrentPlayer = firstPlayer == currentPlayer,
+                    isFirst = true,
+                )
+            }
             Text(
                 text = "vs",
                 color = Color.Gray,
                 fontSize = 24.sp,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
-            PlayerScore(
-                player = secondPlayer,
-                isCurrentPlayer = secondPlayer == currentPlayer
-            )
+            if (secondPlayer != null) {
+                PlayerScore(
+                    player = secondPlayer,
+                    isCurrentPlayer = secondPlayer == currentPlayer
+                )
+            }
 
 
         }
@@ -87,7 +108,8 @@ internal fun ScoreBoard(
 internal fun PlayerScore(
     modifier : Modifier = Modifier,
     player: Player,
-    isCurrentPlayer: Boolean = true
+    isCurrentPlayer: Boolean = true,
+    isFirst : Boolean = false
 ) {
     val alpha = if (isCurrentPlayer) ContentAlpha.high else ContentAlpha.disabled
 
@@ -99,14 +121,14 @@ internal fun PlayerScore(
             verticalAlignment = Alignment.CenterVertically,
         ) {
 
-            if(player.name == "Player 1") {
-                playerNamePanel(player = player)
+            if(isFirst) {
+                PlayerNamePanel(player = player)
                 Spacer(modifier = Modifier.width(8.dp))
                 playerSkorPanel(player = player)
             } else {
                 playerSkorPanel(player = player)
                 Spacer(modifier = Modifier.width(8.dp))
-                playerNamePanel(player = player)
+                PlayerNamePanel(player = player)
             }
         }
 
@@ -117,7 +139,7 @@ internal fun PlayerScore(
 }
 
 @Composable
-fun playerNamePanel(
+fun PlayerNamePanel(
     player : Player
 ) {
     Column(
@@ -200,9 +222,12 @@ fun PlayerLives(playerLives: Int) {
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
                 tint = DarkRed,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(
+                    if(playerLives > 2) ((80 / playerLives) - (10 - (2 * playerLives))).dp
+                    else 27.dp
+                )
             )
-            Spacer(modifier = Modifier.width(6.dp))
+            Spacer(modifier = Modifier.width(3.dp))
         }
     }
 }

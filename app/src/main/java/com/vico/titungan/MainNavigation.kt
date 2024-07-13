@@ -17,6 +17,7 @@ import androidx.navigation.navArgument
 import com.vico.titungan.ui.navigation.Nav
 import com.vico.titungan.ui.screen.CustomGameScreen
 import com.vico.titungan.ui.screen.MenuScreen
+import com.vico.titungan.ui.screen.SplashScreen
 import com.vico.titungan.ui.screen.game.GameConstants
 import com.vico.titungan.ui.screen.game.GameScreen
 import com.vico.titungan.ui.theme.TitunganTheme
@@ -41,18 +42,14 @@ internal fun MainNavigation() {
                 NavHost(
                     modifier = Modifier.weight(1f),
                     navController = navController,
-                    startDestination = Nav.Routes.mainMenu,
+                    startDestination = Nav.Routes.splashScreen,
                     builder = {
+                        composable(Nav.Routes.splashScreen) {
+                            SplashScreen(navController)
+                        }
                         composable(Nav.Routes.mainMenu) {
                             MenuScreen(navController)
                         }
-//                        composable("coba/{nama}", arguments = listOf(
-//                            navArgument("nama") {type = NavType.StringType}
-//                        )) {
-//                            var nama = it.arguments?.getString("nama") ?: "add,sub"
-//                            var namafix = nama.split(",").toTypedArray()
-//                            Coba(namafix)
-//                        }
                         composable(
                             Nav.Routes.game,
                             arguments = listOf(

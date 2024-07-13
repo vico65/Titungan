@@ -1,5 +1,9 @@
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -33,6 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxColors
@@ -51,6 +56,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.window.DialogProperties
 import com.vico.titungan.R
 import com.vico.titungan.ui.component.RingShape
 import com.vico.titungan.ui.component.ShapePreview
@@ -79,18 +86,156 @@ import com.vico.titungan.ui.theme.yellow
 @Composable
 fun ClockPreview() {
 
-//    TitunganTheme() {
-//        Coba("Vico")
-//    }
+    TitunganTheme() {
+        Coba()
+    }
+}
+
+@Composable
+fun GameResultDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            title = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Selamat!",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
+
+            },
+            text = {
+                Column(
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(
+                            text = "Player 1 telah berhasil memenangkan permainan.",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        )
+                    }
+
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ShapePreview(RingShape, 16.dp,  Salmon )
+
+                        Text(
+                            text = "Player 1 : 3",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                            )
+                        )
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ShapePreview(XShape, 16.dp,  Green )
+
+                        Text(
+                            text = "Player 2 : 1",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                            )
+                        )
+                    }
+
+                }
+            },
+            confirmButton = {
+                ColoredButton(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .wrapContentSize(),
+                    enabled = true,
+                    borderColor = MaterialTheme.colorScheme.onBackground,
+                    text = "Menu"
+                ) {
+
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.background
+        )
+    }
 }
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun Coba(
-    nama : Array<String>
 ) {
-    Log.i("nama", nama.toString())
+    var showExitConfirmation by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false)}
+
+    if (showDialog) {
+        GameResultDialog(showDialog) {
+            showDialog = false
+        }
+    }
+
+    // Tangani tombol "back"
+    BackHandler {
+        showExitConfirmation = true
+    }
+
+    // Tampilkan pop-up konfirmasi
+    if (showExitConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirmation = false },
+            title = { Text("Konfirmasi Keluar") },
+            text = { Text("Apakah Anda yakin ingin keluar? Game akan selesai.") },
+            confirmButton = {
+                Button(onClick = {
+                    // Akhiri game di sini (misalnya, panggil fungsi untuk menutup Activity)
+                    showExitConfirmation = false
+                }) {
+                    Text("Ya")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showExitConfirmation = false }) {
+                    Text("Tidak")
+                }
+            }
+        )
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Welcome to Main Screen", style = MaterialTheme.typography.headlineLarge)
+
+        Button(onClick = {showDialog = true}) {
+            Text("Pencet")
+        }
+    }
 }
 
 @Composable
@@ -469,7 +614,7 @@ sealed class GameDifficulty {
 //                Text(
 //                    text = player.name,
 //                    color = MaterialTheme.colorScheme.primary,
-//                    style = MaterialTheme.typography.displayLarge,
+//                    style = MaterialTheme.typography.bodyLarge,
 //                    fontSize = 16.sp
 //                )
 //            }
