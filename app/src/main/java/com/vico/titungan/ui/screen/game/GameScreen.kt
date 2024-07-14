@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -50,7 +50,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -77,13 +76,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.vico.titungan.R
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
+import com.vico.titungan.ui.component.AlertDialog.DialogExitFromGame
+import com.vico.titungan.ui.component.AlertDialog.GameResultDialog
 import com.vico.titungan.ui.component.text.AnimatingText
 import com.vico.titungan.ui.component.RingShape
+import com.vico.titungan.ui.navigation.Nav
 import com.vico.titungan.ui.theme.BluePastel
 import com.vico.titungan.ui.theme.TitunganTheme
 import kotlinx.coroutines.delay
@@ -96,7 +99,7 @@ fun GameScreenPreview() {
     val navController: NavHostController = rememberNavController()
 
     TitunganTheme() {
-        GameScreen("Vico", "Ridho", 5, 15, 3, 1, 0, 0, arrayOf("+", "-"), 1)
+        GameScreen("Vico", "Ridho", 5, 15, 3, 1, 0, 0, arrayOf("+", "-"), 1, false)
     }
 }
 
@@ -112,7 +115,9 @@ fun GameScreen(
     defisitSkor : Int,
     maksimumSkor : Int,
     listOperators : Array<String>,
-    playOrder : Int
+    playOrder : Int,
+    tutupTiles : Boolean,
+    navController : NavController = rememberNavController(),
 ) {
 
     LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -126,7 +131,8 @@ fun GameScreen(
             nyawa,
             tiles,
             listOperators,
-            playOrder
+            playOrder,
+            tutupTiles
         )
     }
 
@@ -134,6 +140,32 @@ fun GameScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    if(gameState.showWinnerDialog.value) gameState.winner.value?.let {
+        GameResultDialog(
+        onDismiss = {  },
+        winner = it,
+        loser = if(it == gameState.players.value[0]) gameState.players.value[1] else gameState.players.value[0]
+        ){
+            gameState.showWinnerDialog.value = false
+            navController.navigate(Nav.Routes.mainMenu)
+        }
+    }
+
+    BackHandler {
+        gameState.showExitConfirmation.value = true
+    }
+
+    if (gameState.showExitConfirmation.value) {
+        DialogExitFromGame(
+            onDismissRequest = {},
+            onConfirm = {
+                gameState.showExitConfirmation.value = false
+                navController.navigate(Nav.Routes.mainMenu)
+            },
+            onDismiss = {gameState.showExitConfirmation.value = false}
+        )
+    }
 
     Scaffold (
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -152,9 +184,13 @@ fun GameScreen(
                             .padding(vertical = 16.dp)
                             .verticalScroll(rememberScrollState()),
                         content = {
-                            val isRunning = true
+                            var isRunning = true
                             var timeLeft by remember { mutableIntStateOf(waktu) }
                             var dropDownMenuExpanded by remember { mutableStateOf(false) }
+
+                            if(gameState.showWinnerDialog.value) {
+                                isRunning = false
+                            }
 
                             LaunchedEffect(isRunning) {
                                 while (isRunning) {
@@ -202,7 +238,8 @@ fun GameScreen(
                                         isGameFinished = gameState.isGameFinished.value,
                                         activeCell = gameState.activeCell.value,
                                         shapeProvider = gameState::getOwnerShape,
-                                        onItemClick = gameState::changeActiveCell
+                                        onItemClick = gameState::changeActiveCell,
+                                        isHasChance = gameState.isHasChance.value
                                     )
                                 }
                             )
@@ -404,6 +441,7 @@ private fun GameBoard(
     gameSize: Int,
     gameCells: List<List<TitunganCell>>,
     isGameFinished: Boolean,
+    isHasChance: Boolean,
     activeCell: TitunganCell?,
     shapeProvider: (Player?) -> Shape,
     onItemClick: (TitunganCell) -> Unit
@@ -440,10 +478,11 @@ private fun GameBoard(
 
                     TitunganItem(
                         cell,
-                        clickable = !isGameFinished && cell.owner == null,
+                        clickable = !isGameFinished && cell.owner == null && isHasChance,
                         shape = shapeProvider(cell.owner),
                         size = boxItemSize,
                         hasOwner = cell.owner != null,
+                        isClosed = cell.isClosed,
                         onClick = { onItemClick(cell) },
                         backgroundColor = backgroundColorAnimated,
                     )
@@ -461,7 +500,8 @@ private fun TitunganItem(
     size: Dp,
     hasOwner: Boolean,
     backgroundColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isClosed: Boolean
 ) {
 
     Box(
@@ -482,7 +522,7 @@ private fun TitunganItem(
         contentAlignment = Alignment.Center,
         content = {
             AnimatedVisibility(
-                visible = !hasOwner,
+                visible = !hasOwner && !isClosed,
                 content = {
                     if (!hasOwner) {
                         Text(

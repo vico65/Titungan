@@ -84,6 +84,7 @@ fun CustomGameScreen(
 
     var listOperatorFix by remember{ mutableStateOf(listOf(true, true, true, true)) }
     var playOrder by remember { mutableStateOf(1) }
+    var closeTiles by remember {mutableStateOf(false)}
 
     Column(
         modifier = Modifier
@@ -191,7 +192,11 @@ fun CustomGameScreen(
                         content = {
                             TextFieldHowToWin(
                                 value = maksimumSkor,
-                                onValueChange = { maksimumSkor = it },
+                                onValueChange = {
+                                                if(it.text.toInt() < (tiles + 2) * (tiles + 2) && it.text.toInt() % 2 != 0) {
+                                                    maksimumSkor = it
+                                                }
+                                },
                                 isSelected = caraMenang == 3
                             )
                         }
@@ -206,6 +211,11 @@ fun CustomGameScreen(
             list = GameConstants.listGameFirstPlayOption,
             element = playOrder
         ) { playOrder = it }
+
+        //checkbox for close tiles
+        checkBoxForCloseTiles(closeTiles = closeTiles) {
+            closeTiles = it
+        }
 
         //button start game
         ColoredButton(
@@ -421,4 +431,33 @@ internal fun RadioButtonTemplatePlayOrder(
     }
 
     SpacerBetweenRow(12.dp)
+}
+
+@Composable
+internal fun checkBoxForCloseTiles(
+    closeTiles : Boolean,
+    onCheckedChange : (Boolean) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 6.dp)
+    ) {
+        LabelText(text = "Tutup Tiles")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                checked = closeTiles,
+                onCheckedChange = { onCheckedChange(it) },
+                colors = CheckboxDefaults.colors(
+                    checkmarkColor = MaterialTheme.colorScheme.background
+                )
+            )
+            Text("Tutup")
+
+        }
+        SpacerBetweenRow()
+    }
 }

@@ -1,6 +1,7 @@
 package com.vico.titungan.ui.screen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -29,9 +30,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -53,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.vico.titungan.R
 import com.vico.titungan.ui.component.button.RoundedButton
-import com.vico.titungan.ui.navigation.Nav
+import com.vico.titungan.ui.theme.DarkRed
 import com.vico.titungan.ui.theme.yellow
 import kotlinx.coroutines.launch
 
@@ -72,16 +78,23 @@ fun MenuScreen(
    navController: NavController,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
+    var showInfoDialog = remember { mutableStateOf(false) }
     val gameCategory: MutableState<List<GameCategoryItem>> = mutableStateOf(listOf(
         GameCategoryItem(
-            title = "Quick Game",
-            isGameInProgress = false,
+            title = "Easy",
+            message = "4 x 4"
+        ),
+        GameCategoryItem(
+            title = "Medium",
+            message = "7 x 7"
+        ),
+        GameCategoryItem(
+            title = "Hard",
             message = "7 x 7"
         ),
         GameCategoryItem(
             title = "Custom",
-            isGameInProgress = false,
             message = "Atur sendiri peraturan game anda"
         )
     ))
@@ -108,6 +121,9 @@ fun MenuScreen(
                 modifier = Modifier.fillMaxSize(),
                 pagerState = pagerState,
                 gameCategoryItem = gameCategory.value,
+                showInfoDialog = showInfoDialog.value,
+                onDialogClick = {showInfoDialog.value = false},
+                onButtonClick = {showInfoDialog.value = true}
             )
 
             PagerButtons(
@@ -138,10 +154,9 @@ fun MenuScreen(
                 .weight(1f),
             onStartClicked = {
                 //                val item = difficulties.value[pagerState.currentPage].difficulty
-                //
-                val array = arrayOf("add", "sub", "mul", "div")
-                val result = array.joinToString(separator = ",")
-                navController.navigate("game/Vico/Ridho/5/15/3/1/0/0/+,-/3")
+
+//                Log.i("PagerState", "${pagerState.currentPage}")
+                navController.navigate("game/Vico/Ridho/5/15/3/3/0/3/x/3/false")
             },
             onSettingsClicked = {  },
         )
@@ -293,6 +308,9 @@ fun GameCategoryView(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     gameCategoryItem: List<GameCategoryItem>,
+    showInfoDialog: Boolean,
+    onDialogClick: () -> Unit,
+    onButtonClick: () -> Unit
 ) {
 
     CompositionLocalProvider(
@@ -307,6 +325,9 @@ fun GameCategoryView(
             GameCategoryItem(
                 modifier = Modifier.fillMaxSize(),
                 category = gameCategoryItem[page],
+                showInfoDialog = showInfoDialog,
+                onDialogClick = onDialogClick,
+                onButtonClick = onButtonClick
             )
         }
     }
@@ -316,6 +337,9 @@ fun GameCategoryView(
 internal fun GameCategoryItem(
     modifier: Modifier = Modifier,
     category: GameCategoryItem,
+    showInfoDialog: Boolean,
+    onDialogClick: () -> Unit = {},
+    onButtonClick: () -> Unit = {}
 ) {
 
     Box(
@@ -329,12 +353,11 @@ internal fun GameCategoryItem(
                 .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
             // Title
             Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(),
+                    .wrapContentSize()
+                    .fillMaxWidth(),
                 text = category.title,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -358,14 +381,14 @@ internal fun GameCategoryItem(
                 ),
             )
 
-            Row {
+            Row (
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ){
 
                 Text(
                     modifier = Modifier
-                        .wrapContentSize()
-                        .wrapContentSize()
-                        .align(alignment = Alignment.CenterVertically),
-                    text = "Game cepat, 5 skor maks",
+                        .wrapContentSize(),
+                    text = "5",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.onBackground,
@@ -374,16 +397,42 @@ internal fun GameCategoryItem(
                     ),
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
-
                 Icon(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(color = Color.Transparent),
-                    painter = painterResource(id = R.drawable.bolt),
-                    tint = yellow,
-                    contentDescription = null,
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Nyawa",
+                    tint = DarkRed,
+                    modifier = Modifier.size(18.dp)
                 )
+            }
+
+            Row (horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    modifier = Modifier
+                        .wrapContentSize(),
+                    text = "detail",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Light
+                    ),
+                )
+
+                IconButton(onClick = onButtonClick) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Info",
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+
+
+
+
+
+            if (showInfoDialog) {
+
             }
         }
     }
@@ -392,6 +441,5 @@ internal fun GameCategoryItem(
 @Immutable
 data class GameCategoryItem(
     val title: String,
-    val isGameInProgress: Boolean,
     val message: String
 )

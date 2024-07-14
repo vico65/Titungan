@@ -1,24 +1,18 @@
 package com.vico.titungan.ui.screen.game
 
 import android.content.Context
-import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.currentCompositionErrors
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import com.vico.titungan.R
-import com.vico.titungan.logic.SimpleGameLogic
-import com.vico.titungan.model.Operator
 import com.vico.titungan.model.Player
 import com.vico.titungan.model.TitunganCell
 import com.vico.titungan.ui.component.RingShape
@@ -54,13 +48,17 @@ class GameState (
     var activeCell: MutableState<TitunganCell?>,
     var isTimerRunning: MutableState<Boolean>,
     var isPlayerInputRightValue: MutableState<Boolean>,
-    var showSnackbar : MutableState<Boolean>
+    var showSnackbar : MutableState<Boolean>,
+    var isHasChance : MutableState<Boolean>,
+    var showWinnerDialog : MutableState<Boolean>,
+    var showExitConfirmation : MutableState<Boolean>,
 
     ) {
 
     private var isSoundOn = true
     private var isVibrationOn = true
     private var gameLogic: GameLogic? = null
+    private var tutupTiles = false
 //    private val dataStore = DataStoreHelper(context.settings)
 
     init {
@@ -77,27 +75,30 @@ class GameState (
         nyawa : Int,
         tiles : Int,
         listOperators : Array<String>,
-        playOrder : Int
+        playOrder : Int,
+        tutupTiles : Boolean
     )  {
 
-        prepareGameRules(tiles)
+        prepareGameRules(tiles, listOperators)
 
-        resetGame()
+        this.tutupTiles = tutupTiles
+        resetGame(listOperators)
         preparePlayers(player1, player2, nyawa, playOrder)
 //        prepareGameLogic()
 //        prepareGame()
         isGameStarted.value = true
     }
-    private fun prepareGameRules(size : Int) {
+    private fun prepareGameRules(size: Int, listOperators: Array<String>) {
         //harusny pake data store
         gameSize.intValue = size
+        selectedOperator.value = listOperators.first()
     }
 
-    private fun resetGame() {
+    private fun resetGame(listOperators: Array<String>) {
         winner.value = null
         isGameFinished.value = false
         isGameStarted.value = false
-        gameCells.value = getEmptyBoard()
+        gameCells.value = getEmptyBoard(listOperators)
     }
 
     private fun preparePlayers(player1 : String, player2 : String, nyawa: Int, playOrder: Int) {
@@ -154,24 +155,40 @@ class GameState (
         defisitSkor : Int,
         maksimumSkor : Int,
     ) {
-        if(checkResult()) {
-            addScore()
-            if(caraMenang == 1 || caraMenang == 2) {
-                //cek dulu apakah semua tiles sudah penuh
-                if(checkIfAllTilesIsFull()) winner.value = getHigherScorePlayer()
+//        if(checkResult()) {
+//            addScore()
+//            if(caraMenang == 1 || caraMenang == 2) {
+//                //cek dulu apakah semua tiles sudah penuh
+//                if(checkIfAllTilesIsFull()) winner.value = getHigherScorePlayer()
+//
+//                //cek apakah defisit skornyo
+//                else if (caraMenang == 2 && abs(players.value.first().score - players.value.last().score) == defisitSkor) winner.value = getHigherScorePlayer()
+//
+//            } else {
+//                if(players.value.first().score + players.value.last().score == maksimumSkor) winner.value = getHigherScorePlayer()
+//            }
+//
+//            activeCell.value?.owner = currentPlayer.value
+//        } else {
+//            currentPlayer.value?.life = currentPlayer.value?.life!! - 1
+//            showSnackbar.value = true
+//        }
 
-                //cek apakah defisit skornyo
-                else if (caraMenang == 2 && abs(players.value.first().score - players.value.last().score) == defisitSkor) winner.value = getHigherScorePlayer()
+        addScore()
+        if(caraMenang == 1 || caraMenang == 2) {
+            //cek dulu apakah semua tiles sudah penuh
+            if(checkIfAllTilesIsFull()) winner.value = getHigherScorePlayer()
 
-            } else {
-                if(players.value.first().score + players.value.last().score == maksimumSkor) winner.value = getHigherScorePlayer()
-            }
+            //cek apakah defisit skornyo
+            else if (caraMenang == 2 && abs(players.value.first().score - players.value.last().score) == defisitSkor) winner.value = getHigherScorePlayer()
 
-            activeCell.value?.owner = currentPlayer.value
         } else {
-            currentPlayer.value?.life = currentPlayer.value?.life!! - 1
-            showSnackbar.value = true
+            if(players.value.first().score + players.value.last().score == maksimumSkor) winner.value = getHigherScorePlayer()
         }
+
+        showWinnerDialog.value = true
+
+        activeCell.value?.owner = currentPlayer.value
 
         //waktunyo reset
         isPlayerInputRightValue.value = true
@@ -189,7 +206,16 @@ class GameState (
 
     }
 
-    fun changeActiveCell(cell: TitunganCell) {activeCell.value = cell}
+    fun changeActiveCell(cell: TitunganCell) {
+//        activeCell.value = cell
+//
+//        if(tutupTiles) {
+//            cell.isClosed = false
+//            isHasChance.value = false
+//        }
+
+        checkIsRightAnswer(caraMenang = 3, defisitSkor = 0, maksimumSkor = 3)
+    }
 
     private fun addScore() {currentPlayer.value?.score = currentPlayer.value?.score!! + 1}
 
@@ -218,25 +244,46 @@ class GameState (
 //        gameLogic = SimpleGameLogic(gameCells.value, gameSize.intValue)
 //    }
 
-    fun getRandomNumber(jumlahCells : Int = 0) : MutableList<Int>{
+    fun getRandomNumber(jumlahCells : Int = 0, listOperators: Array<String>, min : Int = 11, max : Int = 100) : MutableList<Int>{
         val angkaRandom  = mutableListOf<Int>()
+        var angkaRandomTemp = 0
 
-        for (i in 1..jumlahCells * jumlahCells) {
-            angkaRandom.add(Random.nextInt(11, 100))
+        if(listOperators.size <= 2 && (!listOperators.contains("+") && !listOperators.contains("-"))) {
+            while (angkaRandom.size < jumlahCells * jumlahCells) {
+                angkaRandomTemp = Random.nextInt(min, max)
+
+                if(!isPrime(angkaRandomTemp) ) angkaRandom.add(angkaRandomTemp)
+            }
+        } else {
+            for (i in 1..jumlahCells * jumlahCells) {
+                angkaRandom.add(Random.nextInt(min, max))
+            }
         }
+
         return angkaRandom
     }
 
-    private fun getEmptyBoard(): List<List<TitunganCell>> {
+    fun isPrime(num: Int): Boolean {
+        if (num < 2) return false
+        for (i in 2 until num) {
+            if (num % i == 0) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun getEmptyBoard(listOperators : Array<String>): List<List<TitunganCell>> {
         Log.i("Marghafsssf", "iyaa")
 
         val columns = mutableListOf<List<TitunganCell>>()
-        val angkaRandom = getRandomNumber(gameSize.intValue)
+        val angkaRandom = getRandomNumber(gameSize.intValue, listOperators)
         var iterator = 0
         for (x in 0 until gameSize.intValue) {
             val row = mutableListOf<TitunganCell>()
             for (y in 0 until gameSize.intValue) {
-                row.add(TitunganCell(x, y, angkaRandom.get(iterator)))
+                if (tutupTiles) row.add(TitunganCell(x = x, y = y, number = angkaRandom.get(iterator), isClosed = true))
+                else row.add(TitunganCell(x = x, y = y, number = angkaRandom.get(iterator)))
                 iterator++
             }
 //
@@ -255,19 +302,10 @@ class GameState (
 
 
     fun changePlayer() {
-        Log.i("Player Turn Info", "${currentPlayer.value}")
+        if (currentPlayer.value == players.value.first()) currentPlayer.value = players.value.last()
+        else currentPlayer.value = players.value.first()
 
-
-        if (currentPlayer.value == players.value.first()) {
-            currentPlayer.value = players.value.last()
-            Log.i("blals","true")
-        }
-        else {
-            currentPlayer.value = players.value.first()
-            Log.i("blals","false")
-        }
-
-        Log.i("Player Turn Info", "${currentPlayer.value}")
+        if(tutupTiles) isHasChance.value = true
 
     }
 
@@ -324,14 +362,10 @@ fun rememberHomeState(
     activeCell: MutableState<TitunganCell?> = rememberSaveable { mutableStateOf(null) },
     isTimerRunning: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) },
     isPlayerInputRightValue: MutableState<Boolean> = rememberSaveable {mutableStateOf(false)},
-    showSnackbar: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-//    isGameDrew: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-//    isRollingDices: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-//        firstPlayerPolicy: MutableState<FirstPlayerPolicy> = rememberSaveable {
-//            mutableStateOf(
-//                FirstPlayerPolicy.DiceRolling
-//            )
-//        },
+    showSnackbar: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    isHasChance: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) },
+    showWinnerDialog: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    showExitConfirmation: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 ) = remember(
     hapticFeedback,
     context,
@@ -347,7 +381,10 @@ fun rememberHomeState(
     selectedOperator,
     activeCell,
     isTimerRunning,
-    showSnackbar
+    showSnackbar,
+    isHasChance,
+    showWinnerDialog,
+    showExitConfirmation
 ) {
     GameState(
         hapticFeedback,
@@ -359,15 +396,15 @@ fun rememberHomeState(
         isGameStarted,
         isGameFinished,
         winner,
-//            isRollingDices,
-//            firstPlayerPolicy,
         numberInput1,
         numberInput2,
         selectedOperator,
         activeCell,
-
         isTimerRunning,isPlayerInputRightValue,
-        showSnackbar
+        showSnackbar,
+        isHasChance,
+        showWinnerDialog,
+        showExitConfirmation
     )
 }
 

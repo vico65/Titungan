@@ -42,7 +42,7 @@ internal fun MainNavigation() {
                 NavHost(
                     modifier = Modifier.weight(1f),
                     navController = navController,
-                    startDestination = Nav.Routes.splashScreen,
+                    startDestination = Nav.Routes.mainMenu,
                     builder = {
                         composable(Nav.Routes.splashScreen) {
                             SplashScreen(navController)
@@ -63,6 +63,7 @@ internal fun MainNavigation() {
                                 navArgument("maksimumSkor") {type = NavType.IntType},
                                 navArgument("listOperators") {type = NavType.StringType},
                                 navArgument("playOrder") {type = NavType.IntType},
+                                navArgument("tutupTiles") {type = NavType.BoolType}
                             )
                         ) {
                             val player1 = it.arguments?.getString("player1")?: R.string.first_player_default_name
@@ -76,6 +77,7 @@ internal fun MainNavigation() {
                             val listOperators = it.arguments?.getString("listOperators")?: "+,-"
                             val listOperatorsArray = listOperators.split(",").toTypedArray()
                             val playOrder = it.arguments?.getInt("playOrder")?: 1
+                            val tutupTiles = it.arguments?.getBoolean("tutupTiles")?: false
                             GameScreen(
                                 player1 = player1.toString(),
                                 player2 = player2.toString(),
@@ -86,7 +88,9 @@ internal fun MainNavigation() {
                                 defisitSkor = defisitSkor,
                                 maksimumSkor = maksimumSkor,
                                 listOperators = listOperatorsArray,
-                                playOrder = playOrder
+                                playOrder = playOrder,
+                                tutupTiles = tutupTiles,
+                                navController = navController
                             )
                         }
                         composable(Nav.Routes.customGame) {

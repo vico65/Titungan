@@ -1,14 +1,8 @@
 import android.annotation.SuppressLint
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
@@ -29,56 +23,30 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxColors
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.window.DialogProperties
 import com.vico.titungan.R
-import com.vico.titungan.ui.component.RingShape
-import com.vico.titungan.ui.component.ShapePreview
-import com.vico.titungan.ui.component.XShape
-import com.vico.titungan.ui.component.button.ColoredButton
+import com.vico.titungan.model.Player
 import com.vico.titungan.ui.component.button.HighlightedRoundedButton
 import com.vico.titungan.ui.component.button.RoundedButton
-import com.vico.titungan.ui.screen.game.GameConstants
-import com.vico.titungan.ui.theme.Green
-import com.vico.titungan.ui.theme.Salmon
 import com.vico.titungan.ui.theme.TitunganTheme
 import com.vico.titungan.ui.theme.yellow
 
@@ -91,99 +59,7 @@ fun ClockPreview() {
     }
 }
 
-@Composable
-fun GameResultDialog(
-    showDialog: Boolean,
-    onDismiss: () -> Unit
-) {
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { onDismiss() },
-            title = {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Selamat!",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                }
 
-            },
-            text = {
-                Column(
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Text(
-                            text = "Player 1 telah berhasil memenangkan permainan.",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                        )
-                    }
-
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ShapePreview(RingShape, 16.dp,  Salmon )
-
-                        Text(
-                            text = "Player 1 : 3",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                            )
-                        )
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ShapePreview(XShape, 16.dp,  Green )
-
-                        Text(
-                            text = "Player 2 : 1",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                            )
-                        )
-                    }
-
-                }
-            },
-            confirmButton = {
-                ColoredButton(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .wrapContentSize(),
-                    enabled = true,
-                    borderColor = MaterialTheme.colorScheme.onBackground,
-                    text = "Menu"
-                ) {
-
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.background
-        )
-    }
-}
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -192,12 +68,11 @@ fun Coba(
 ) {
     var showExitConfirmation by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false)}
+    var players = listOf(Player("Vico", "xShape"), Player("Ridho", "ringShape"))
 
-    if (showDialog) {
-        GameResultDialog(showDialog) {
-            showDialog = false
-        }
-    }
+//    if (showDialog) {
+//        GameResultDialog(showDialog = showDialog, winner = players[0], loser = players[1], onDismiss = {showDialog = false})
+//    }
 
     // Tangani tombol "back"
     BackHandler {
@@ -206,24 +81,7 @@ fun Coba(
 
     // Tampilkan pop-up konfirmasi
     if (showExitConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showExitConfirmation = false },
-            title = { Text("Konfirmasi Keluar") },
-            text = { Text("Apakah Anda yakin ingin keluar? Game akan selesai.") },
-            confirmButton = {
-                Button(onClick = {
-                    // Akhiri game di sini (misalnya, panggil fungsi untuk menutup Activity)
-                    showExitConfirmation = false
-                }) {
-                    Text("Ya")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showExitConfirmation = false }) {
-                    Text("Tidak")
-                }
-            }
-        )
+
     }
 
     Box(

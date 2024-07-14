@@ -26,6 +26,7 @@ internal fun ColoredButton(
     enabled: Boolean,
     borderColor: Color,
     text: String,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit,
 ) {
     Button(
@@ -37,7 +38,7 @@ internal fun ColoredButton(
         ),
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = containerColor,
             disabledContainerColor = Color.DarkGray.copy(alpha = 0.7f),
         ),
         shape = CircleShape

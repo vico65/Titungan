@@ -10,5 +10,6 @@ data class TitunganCell(
     val y: Int,
     var number: Int,
     var owner: Player? = null,
-    var isActive: Boolean = false
+    var isActive: Boolean = false,
+    var isClosed: Boolean = false
 ) : Parcelable

@@ -15,14 +15,40 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
 
-        var random = Random.nextInt(0, 2)
-        print(Random.nextInt(0, 2))
-        print(Random.nextInt(0, 2))
-        print(Random.nextInt(0, 2))
-        print(Random.nextInt(0, 2))
+        print(getRandomNumber(3, arrayOf("x")))
+        print(getRandomNumber(3, arrayOf("/")))
+        print(getRandomNumber(3, arrayOf("x", "+")))
+        print(getRandomNumber(3, arrayOf("x", "-")))
+        print(getRandomNumber(3, arrayOf("/", "-")))
+        print(getRandomNumber(3, arrayOf("/", "+")))
+        print(getRandomNumber(3, arrayOf("x", "-", "+")))
+        print(getRandomNumber(3, arrayOf("x", "/","-")))
 
-        print(random)
+
     }
+}
+
+fun getRandomNumber(jumlahCells : Int = 0, listOperators: Array<String>, min : Int = 11, max : Int = 100) : String{
+    var angkaRandom  = ""
+    var angkaRandomTemp = 0
+
+    if(listOperators.size <= 2 && (!listOperators.contains("+") && !listOperators.contains("-"))) {
+        angkaRandom = "\n\nNeed Prime\n"
+    } else {
+        angkaRandom = "\n\nDoesn't Need Prime\n"
+    }
+
+    return angkaRandom
+}
+
+fun isPrime(num: Int): Boolean {
+    if (num < 2) return false
+    for (i in 2 until num) {
+        if (num % i == 0) {
+            return false
+        }
+    }
+    return true
 }
 
 //fun randomNumber(jumlahCells : Int = 0) {
