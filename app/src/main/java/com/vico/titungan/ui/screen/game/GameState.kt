@@ -155,40 +155,26 @@ class GameState (
         defisitSkor : Int,
         maksimumSkor : Int,
     ) {
-//        if(checkResult()) {
-//            addScore()
-//            if(caraMenang == 1 || caraMenang == 2) {
-//                //cek dulu apakah semua tiles sudah penuh
-//                if(checkIfAllTilesIsFull()) winner.value = getHigherScorePlayer()
-//
-//                //cek apakah defisit skornyo
-//                else if (caraMenang == 2 && abs(players.value.first().score - players.value.last().score) == defisitSkor) winner.value = getHigherScorePlayer()
-//
-//            } else {
-//                if(players.value.first().score + players.value.last().score == maksimumSkor) winner.value = getHigherScorePlayer()
-//            }
-//
-//            activeCell.value?.owner = currentPlayer.value
-//        } else {
-//            currentPlayer.value?.life = currentPlayer.value?.life!! - 1
-//            showSnackbar.value = true
-//        }
+        if(checkResult()) {
+            addScore()
+            if(caraMenang == 1 || caraMenang == 2) {
+                //cek dulu apakah semua tiles sudah penuh
+                if(checkIfAllTilesIsFull()) winner.value = getHigherScorePlayer()
 
-        addScore()
-        if(caraMenang == 1 || caraMenang == 2) {
-            //cek dulu apakah semua tiles sudah penuh
-            if(checkIfAllTilesIsFull()) winner.value = getHigherScorePlayer()
+                //cek apakah defisit skornyo
+                else if (caraMenang == 2 && abs(players.value.first().score - players.value.last().score) == defisitSkor) winner.value = getHigherScorePlayer()
 
-            //cek apakah defisit skornyo
-            else if (caraMenang == 2 && abs(players.value.first().score - players.value.last().score) == defisitSkor) winner.value = getHigherScorePlayer()
+            } else {
+                if(players.value.first().score + players.value.last().score == maksimumSkor) winner.value = getHigherScorePlayer()
+            }
 
+            if(winner.value != null) showWinnerDialog.value = true
+
+            activeCell.value?.owner = currentPlayer.value
         } else {
-            if(players.value.first().score + players.value.last().score == maksimumSkor) winner.value = getHigherScorePlayer()
+            currentPlayer.value?.life = currentPlayer.value?.life!! - 1
+            showSnackbar.value = true
         }
-
-        showWinnerDialog.value = true
-
-        activeCell.value?.owner = currentPlayer.value
 
         //waktunyo reset
         isPlayerInputRightValue.value = true
@@ -202,19 +188,45 @@ class GameState (
         changePlayer()
     }
 
+    fun checkResult(
+        result: Int? = activeCell.value?.number
+    ) : Boolean {
+        Log.i("Result", "$result")
+        return countResult() == result
+    }
+
+    fun changePlayerLive() {
+        currentPlayer.value?.life = currentPlayer.value?.life!! - 1
+        if (currentPlayer.value?.life == 0) {
+            winner.value = if(currentPlayer.value == players.value[0]) players.value[1] else players.value[0]
+
+            showWinnerDialog.value = true
+
+            //waktunyo reset
+            isPlayerInputRightValue.value = true
+
+            //hapus inputan
+            numberInput1.value = ""
+            numberInput2.value = ""
+            selectedOperator.value = "+"
+
+            activeCell.value = null
+        }
+
+
+    }
+
     fun checkWin() {
 
     }
 
     fun changeActiveCell(cell: TitunganCell) {
-//        activeCell.value = cell
-//
-//        if(tutupTiles) {
-//            cell.isClosed = false
-//            isHasChance.value = false
-//        }
+        activeCell.value = cell
 
-        checkIsRightAnswer(caraMenang = 3, defisitSkor = 0, maksimumSkor = 3)
+        if(tutupTiles) {
+            cell.isClosed = false
+            isHasChance.value = false
+        }
     }
 
     private fun addScore() {currentPlayer.value?.score = currentPlayer.value?.score!! + 1}
@@ -232,17 +244,6 @@ class GameState (
             else -> {0}
         }
     }
-
-    fun checkResult(
-        result: Int? = activeCell.value?.number
-    ) : Boolean {
-        Log.i("Result", "$result")
-        return countResult() == result
-    }
-
-//    private fun prepareGameLogic() {
-//        gameLogic = SimpleGameLogic(gameCells.value, gameSize.intValue)
-//    }
 
     fun getRandomNumber(jumlahCells : Int = 0, listOperators: Array<String>, min : Int = 11, max : Int = 100) : MutableList<Int>{
         val angkaRandom  = mutableListOf<Int>()

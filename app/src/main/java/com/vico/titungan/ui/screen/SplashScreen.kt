@@ -61,7 +61,7 @@ fun SplashScreen(navController: NavHostController) {
             Text(
                 text = "By Alvico",
                 color = MaterialTheme.colorScheme.background,
-                fontSize = 20.sp,
+                fontSize = 16.sp,
                 modifier = Modifier.alpha(alpha)
             )
         }

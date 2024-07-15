@@ -78,8 +78,8 @@ fun CustomGameScreen(
     var waktu by remember { mutableStateOf(15) }
     var tiles by remember { mutableStateOf(1) }
     var caraMenang by remember { mutableStateOf(1) }
-    var defisitSkor by remember { mutableStateOf(TextFieldValue("")) }
-    var maksimumSkor by remember { mutableStateOf(TextFieldValue("")) }
+    var defisitSkor by remember { mutableStateOf(TextFieldValue("0")) }
+    var maksimumSkor by remember { mutableStateOf(TextFieldValue("0")) }
     val scrollState = rememberScrollState()
 
     var listOperatorFix by remember{ mutableStateOf(listOf(true, true, true, true)) }
@@ -224,17 +224,37 @@ fun CustomGameScreen(
                 .wrapContentSize(),
             text = "Mulai",
             onClick = {
-                var listOperators = arrayOf("+", "-")
-//                navController.navigate("game/${player1.text}/${player2.text}/$nyawa/$waktu/${tiles + 2}/$caraMenang/${defisitSkor.text}/${maksimumSkor.text}/$listOperators/$playOrder")
+                var player1Name = if(player1.text != "") player1.text else "Player 1"
+                var player2Name = if(player2.text != "") player2.text else "Player 2"
+                var listOperators = listOperatorsSend(listOperatorFix)
 
-                //dk boleh kosong salah satunya
-                navController.navigate("game/Vico/Ridho/5/15/3/1/0/0/+,-/1")
-//                Log.i("Button dipecet", "game/${player1.text}/${player2.text}/$nyawa/$waktu/${tiles + 2}/$caraMenang/${defisitSkor.text}/${maksimumSkor.text}/$playOrder")
+//                navController.navigate("game/Player 1/Player 2/$nyawa/$waktu/${tiles + 2}/$caraMenang/0/0/+,-,x,%2F/3/true")
+
+                navController.navigate("game/$player1Name/$player2Name/$nyawa/$waktu/${tiles + 2}/$caraMenang/${defisitSkor.text.toInt()}/${maksimumSkor.text.toInt()}/$listOperators/$playOrder/$closeTiles")
             },
             enabled = true,
             borderColor = MaterialTheme.colorScheme.onBackground,
         )
     }
+}
+
+internal fun listOperatorsSend(
+    list: List<Boolean>
+) : String{
+    var newList = ""
+
+    list.forEachIndexed{
+        index, b -> if(b && index != 3) newList += GameConstants.listOperators[index]
+    }
+
+    newList = newList.toList().joinToString(",")
+
+    if(list[3]) {
+        if(list.count {it} == 1) newList += "%2F"
+        else newList += ",%2F"
+    }
+
+    return newList
 }
 
 @Composable
@@ -398,7 +418,7 @@ internal fun TextFieldHowToWin(
                 color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(100),
             ),
-        textStyle = TextStyle(fontSize = 20.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
+        textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,

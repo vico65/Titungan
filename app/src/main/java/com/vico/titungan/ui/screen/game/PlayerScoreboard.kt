@@ -166,13 +166,13 @@ fun PlayerNamePanel(
             ) {
                 player.shape?.toShape()?.let { shape ->
                     if (shape == XShape) ShapePreview(shape, 20.dp, Green)
-                    else ShapePreview(shape, 20.dp, Salmon)
+                    else ShapePreview(shape, 18.dp, Salmon)
                 }
 
                 Text(
                     text = player.name,
                     color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )

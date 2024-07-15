@@ -208,8 +208,11 @@ fun GameScreen(
 
                                     //waktu dio abes
                                     if (timeLeft == 0) {
-                                        gameState.currentPlayer.value?.life = gameState.currentPlayer.value?.life!! - 1
-                                        gameState.changePlayer()
+                                        gameState.changePlayerLive()
+
+                                        if(!gameState.showWinnerDialog.value)
+                                            gameState.changePlayer()
+
                                         timeLeft = waktu
                                     }
                                 }
@@ -361,6 +364,7 @@ private fun FormInputNumber(
                     modifier = Modifier.padding(4.dp),
                     style = TextStyle(
                         color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
                         fontSize = 26.sp
                     )
                 )

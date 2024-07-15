@@ -42,7 +42,7 @@ internal fun MainNavigation() {
                 NavHost(
                     modifier = Modifier.weight(1f),
                     navController = navController,
-                    startDestination = Nav.Routes.mainMenu,
+                    startDestination = Nav.Routes.splashScreen,
                     builder = {
                         composable(Nav.Routes.splashScreen) {
                             SplashScreen(navController)
