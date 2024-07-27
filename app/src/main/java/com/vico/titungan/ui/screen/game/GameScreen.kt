@@ -161,7 +161,11 @@ fun GameScreen(
             onDismissRequest = {},
             onConfirm = {
                 gameState.showExitConfirmation.value = false
-                navController.navigate(Nav.Routes.mainMenu)
+                navController.navigate(Nav.Routes.mainMenu) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
             },
             onDismiss = {gameState.showExitConfirmation.value = false}
         )
@@ -208,7 +212,7 @@ fun GameScreen(
 
                                     //waktu dio abes
                                     if (timeLeft == 0) {
-                                        gameState.changePlayerLive()
+                                        gameState.changePlayerLive(listOperators)
 
                                         if(!gameState.showWinnerDialog.value)
                                             gameState.changePlayer()
@@ -269,7 +273,7 @@ fun GameScreen(
                                         },
                                         buttonEnabled = gameState.numberInput1.value.isNotEmpty() && gameState.numberInput2.value.isNotEmpty(),
                                         buttonOnClick = {
-                                            gameState.checkIsRightAnswer(caraMenang,defisitSkor, maksimumSkor)
+                                            gameState.checkIsRightAnswer(caraMenang,defisitSkor, maksimumSkor, listOperators)
                                             gameState.isPlayerInputRightValue.value = true
 
                                             if (gameState.showSnackbar.value) {

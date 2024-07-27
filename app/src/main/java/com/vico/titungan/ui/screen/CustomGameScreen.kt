@@ -193,9 +193,9 @@ fun CustomGameScreen(
                             TextFieldHowToWin(
                                 value = maksimumSkor,
                                 onValueChange = {
-                                                if(it.text.toInt() < (tiles + 2) * (tiles + 2) && it.text.toInt() % 2 != 0) {
+//                                                if(it.text.toInt() < (tiles + 2) * (tiles + 2) && it.text.toInt() % 2 != 0)
                                                     maksimumSkor = it
-                                                }
+
                                 },
                                 isSelected = caraMenang == 3
                             )

@@ -1,6 +1,5 @@
 package com.vico.titungan
 
-import Coba
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable

@@ -27,7 +27,7 @@
       <SelectionState runConfigName="ClockPreview (1)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="GameScreenPreview">
+      <SelectionState runConfigName="Titunn">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

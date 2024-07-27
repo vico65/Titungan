@@ -2,6 +2,8 @@ package com.vico.titungan.ui.screen
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -84,6 +86,10 @@ fun MenuScreen(
         GameInfoDialog (onConfirm = { showInfoDialog.value = false }, detail = gameCategory[pagerState.currentPage].detail)
     }
 
+    BackHandler {
+        (navController.context as? ComponentActivity)?.finish()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -138,14 +144,20 @@ fun MenuScreen(
                 .fillMaxWidth()
                 .weight(1f),
             onStartClicked = {
-                if(pagerState.currentPage == 0)
-                    navController.navigate("game/Player 1/Player 2/5/30/4/1/0/0/+,-,x,%2F/3/false")
+                val route: String = if(pagerState.currentPage == 0)
+                    "game/Player 1/Player 2/5/30/4/1/0/0/+,-,x,%2F/3/false"
                 else if(pagerState.currentPage == 1)
-                    navController.navigate("game/Player 1/Player 2/4/20/5/1/0/0/x,%2F/3/false")
+                    "game/Player 1/Player 2/4/20/5/1/0/0/x,%2F/3/false"
                 else if(pagerState.currentPage == 2)
-                    navController.navigate("game/Player 1/Player 2/3/20/6/1/0/0/x,%2F/3/true")
+                    "game/Player 1/Player 2/3/20/6/1/0/0/x,%2F/3/true"
                 else
-                    navController.navigate(Nav.Routes.customGame)
+                    Nav.Routes.customGame
+
+                navController.navigate(route) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
             }
         )
     }

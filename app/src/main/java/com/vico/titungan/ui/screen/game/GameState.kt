@@ -154,6 +154,7 @@ class GameState (
         caraMenang : Int,
         defisitSkor : Int,
         maksimumSkor : Int,
+        listOperators: Array<String>
     ) {
         if(checkResult()) {
             addScore()
@@ -168,13 +169,18 @@ class GameState (
                 if(players.value.first().score + players.value.last().score == maksimumSkor) winner.value = getHigherScorePlayer()
             }
 
-            if(winner.value != null) showWinnerDialog.value = true
-
             activeCell.value?.owner = currentPlayer.value
         } else {
             currentPlayer.value?.life = currentPlayer.value?.life!! - 1
-            showSnackbar.value = true
+
+            if (currentPlayer.value?.life == 0) {
+                winner.value = getHigherScorePlayer()
+            } else {
+                showSnackbar.value = true
+            }
         }
+
+        if(winner.value != null) showWinnerDialog.value = true
 
         //waktunyo reset
         isPlayerInputRightValue.value = true
@@ -182,7 +188,7 @@ class GameState (
         //hapus inputan
         numberInput1.value = ""
         numberInput2.value = ""
-        selectedOperator.value = "+"
+        selectedOperator.value = listOperators.first()
 
         activeCell.value = null
         changePlayer()
@@ -195,7 +201,9 @@ class GameState (
         return countResult() == result
     }
 
-    fun changePlayerLive() {
+    fun changePlayerLive(
+        listOperators: Array<String>
+    ) {
         currentPlayer.value?.life = currentPlayer.value?.life!! - 1
         if (currentPlayer.value?.life == 0) {
             winner.value = if(currentPlayer.value == players.value[0]) players.value[1] else players.value[0]
@@ -208,7 +216,7 @@ class GameState (
             //hapus inputan
             numberInput1.value = ""
             numberInput2.value = ""
-            selectedOperator.value = "+"
+            selectedOperator.value = listOperators.first()
 
             activeCell.value = null
         }
