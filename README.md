@@ -1,6 +1,6 @@
 # Titungan
 
-![Project Logo](/image/logo_jpeg)
+![Project Logo](/images/logo.jpeg)
 
 Projek ini merupakan hasil dari tugas akhir skripsi yang berupa game kasual titungan yang dikembangkan menggunakan bahasa pemrograman kotlin dengan framework
 jetpack compose. Cara bermain game ini adalah sebagai berikut: 
@@ -26,13 +26,17 @@ akan mendapatkan skor karena hasil operasi aritmatika dari 30 dan 20 adalah 50, 
 Berikut adalah beberapa tampilan dari aplikasi:
 
 Splash Screen Aplikasi
-![Tampilan halaman depan dengan light mode](/image/splashscreen.jpeg)
 
-Halaman depan dengan Dark Mode
-![Tampilan halaman depan dengan dark mode](/image/halaman_depan_dark_mode.png)
+<img src="/images/splash%20screen.jpeg" alt="Tampilan halaman depan dengan light mode" width="200"/>
 
-Halaman data pribadi mahasiswa
-![Tampilan halaman data_pribadi_mahasiswa](/image/halaman_data_pribadi_mhs.png)
+Halaman depan dengan game mode easy
 
-Halaman krs mahasiswa
-![Tampilan halaman krs](/image/halaman_krs.png)
+<img src="/images/main%20menu%20-%20mudah.jpeg" alt="Tampilan halaman depan dengan dark mode" width="200"/>
+
+Halaman depan dengan dialog box detail game mode easy
+
+<img src="/images/main%20menu%20-%20detail%20mudah.jpeg" alt="Dialog box detail mudah" width="200"/>
+
+Halaman Game
+
+<img src="/images/game%20ketika%20kotak%20diklik.jpeg" alt="Halaman Game" width="200"/>
